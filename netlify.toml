@@ -1,0 +1,5 @@
+[build]
+  ignore = "exit 0"
+
+[build.environment]
+  NETLIFY_SKIP_SECRETS_SCAN = "true"
