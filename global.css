@@ -1,0 +1,181 @@
+/* --------------------------------------------------
+   ROOT VARIABLES
+-------------------------------------------------- */
+:root {
+  --bg: #000000; /* Pure black background */
+  --text: #e6f7ff;
+  --accent: #00eaff;
+  --accent-glow: 0 0 12px rgba(0, 234, 255, 0.7);
+  --glass: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.15);
+  --danger: #ff4b4b;
+  --radius: 14px;
+  --transition: 0.25s ease;
+  --nav-height: 70px;
+}
+
+/* --------------------------------------------------
+   GLOBAL RESET
+-------------------------------------------------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  background: var(--bg); /* Black background for all non-home pages */
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* --------------------------------------------------
+   HOMEPAGE — FULL PIRATE IMAGE (NO CROPPING)
+-------------------------------------------------- */
+.home-glass-bg {
+  background: url("https://res.cloudinary.com/dz5hkoqmw/image/upload/v1772013254/Untitled_Project_-_illustrationImage_1_sgiyd7.png")
+    no-repeat center top;
+  background-size: contain;   /* show entire image */
+  background-color: #000;     /* fill rest of screen with black */
+  min-height: 100vh;
+  color: var(--text);
+}
+
+/* --------------------------------------------------
+   NAVIGATION BAR
+-------------------------------------------------- */
+.top-nav {
+  height: var(--nav-height);
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  padding: 0 30px;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.nav-item {
+  color: var(--text);
+  text-decoration: none;
+  font-size: 18px;
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  transition: var(--transition);
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: var(--accent-glow);
+}
+
+.nav-item.active {
+  background: var(--accent);
+  color: #000;
+  font-weight: 600;
+}
+
+.nav-danger {
+  color: var(--danger);
+}
+
+.nav-admin {
+  color: #ffcc00;
+}
+
+/* --------------------------------------------------
+   HEADERS
+-------------------------------------------------- */
+header {
+  text-align: center;
+  font-size: 34px;
+  font-weight: 700;
+  margin-top: 25px;
+  text-shadow: 0 0 12px rgba(0,255,255,0.5);
+}
+
+/* --------------------------------------------------
+   LAYOUT
+-------------------------------------------------- */
+.container {
+  width: 90%;
+  max-width: 1300px;
+  margin: 30px auto;
+}
+
+.surf-layout {
+  display: flex;
+  gap: 25px;
+  margin-top: 20px;
+}
+
+.sidebar-ad {
+  width: 220px;
+}
+
+@media (max-width: 900px) {
+  .surf-layout {
+    flex-direction: column;
+  }
+  .sidebar-ad {
+    width: 100%;
+  }
+}
+
+/* --------------------------------------------------
+   CARDS
+-------------------------------------------------- */
+.card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  padding: 25px;
+  border-radius: var(--radius);
+  backdrop-filter: blur(10px);
+}
+
+.card h2 {
+  margin-bottom: 15px;
+  font-size: 26px;
+  text-shadow: var(--accent-glow);
+}
+
+/* --------------------------------------------------
+   BUTTONS
+-------------------------------------------------- */
+.btn {
+  width: 100%;
+  padding: 14px;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: var(--radius);
+  border: 1px solid var(--glass-border);
+  background: var(--glass);
+  color: var(--text);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn:hover {
+  background: var(--accent);
+  color: #000;
+  box-shadow: var(--accent-glow);
+}
+
+/* --------------------------------------------------
+   INPUTS
+-------------------------------------------------- */
+input, select {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--glass-border);
+  background: rgba(255,255,255,0.05);
+  color: var(--text);
+}
+
+input:focus, select:focus {
+  border-color: var(--accent);
+  box-shadow: var(--accent-glow);
+}
