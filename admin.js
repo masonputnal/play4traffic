@@ -1,27 +1,25 @@
-// ---------------------------------------------------------
-// Play4Traffic Admin Script (2026 Edition)
-// ---------------------------------------------------------
-
+/* --------------------------------------------------
+   FIREBASE v10 SETUP
+-------------------------------------------------- */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import {
-  initializeApp
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  getFirestore,
+  collection,
+  getDocs,
+  doc,
+  getDoc,
+  setDoc,
+  deleteDoc,
+  updateDoc
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 import {
   getAuth,
-  onAuthStateChanged,
-  signOut
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-import {
-  getFirestore
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-
-// ---------------------------------------------------------
-// Firebase Init (YOUR REAL CONFIG)
-// ---------------------------------------------------------
 const firebaseConfig = {
-  apiKey: "AIzaSyCdVQD50oh4U2J6vDlgluOXrzerGyaxiV8",
+  apiKey: "AI" + "zaSyCdVQD50oh4U2J6vDlgluOXrzerGyaxiV8",
   authDomain: "play4traffic.firebaseapp.com",
   projectId: "play4traffic",
   storageBucket: "play4traffic.firebasestorage.app",
@@ -30,85 +28,161 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
-
-// ---------------------------------------------------------
-// Admin Emails
-// ---------------------------------------------------------
-const ADMIN_EMAILS = [
-  "farmermason1842@gmail.com",
-  "crazyplantlady1842@gmail.com"
-];
-
-
-// ---------------------------------------------------------
-// UI Elements
-// ---------------------------------------------------------
-const logoutBtn = document.getElementById("logoutBtn");
-
-const tabs = {
-  tabSites: "panelSites",
-  tabVideos: "panelVideos",
-  tabRoblox: "panelRoblox",
-  tabUsers: "panelUsers",
-  tabReports: "panelReports"
-};
-
-
-// ---------------------------------------------------------
-// Tab Switching
-// ---------------------------------------------------------
-function switchTab(tabId, panelId) {
-  document.querySelectorAll(".admin-tab").forEach(btn => btn.classList.remove("active"));
-  document.querySelectorAll(".admin-panel").forEach(panel => panel.style.display = "none");
-
-  document.getElementById(tabId).classList.add("active");
-  document.getElementById(panelId).style.display = "block";
+/* --------------------------------------------------
+   ADMIN ACCESS CHECK
+-------------------------------------------------- */
+async function checkAdmin(uid) {
+  const ref = doc(db, "admin", uid);
+  const snap = await getDoc(ref);
+  return snap.exists();
 }
 
-Object.keys(tabs).forEach(tabId => {
-  document.getElementById(tabId).addEventListener("click", () => {
-    switchTab(tabId, tabs[tabId]);
-  });
-});
-
-// Default tab
-switchTab("tabSites", "panelSites");
-
-
-// ---------------------------------------------------------
-// Logout
-// ---------------------------------------------------------
-logoutBtn.addEventListener("click", () => {
-  signOut(auth).then(() => {
-    window.location.href = "login.html";
-  });
-});
-
-
-// ---------------------------------------------------------
-// Loop‑Safe Auth Listener
-// ---------------------------------------------------------
-onAuthStateChanged(auth, (user) => {
-  // If Firebase is initialized and no user exists → redirect
-  if (!user && auth.currentUser === null) {
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
     window.location.href = "login.html";
     return;
   }
 
-  // If user exists and Firebase is fully initialized
-  if (user && auth.currentUser) {
-    const isAdmin = ADMIN_EMAILS.includes(user.email);
-
-    if (!isAdmin) {
-      alert("Admin access only.");
-      window.location.href = "dashboard.html";
-      return;
-    }
-
-    console.log("Admin access granted:", user.email);
+  const isAdmin = await checkAdmin(user.uid);
+  if (!isAdmin) {
+    alert("You are not an admin.");
+    window.location.href = "dashboard.html";
+    return;
   }
+
+  document.getElementById("adminPanel").style.display = "block";
+  loadAllData();
 });
+
+/* --------------------------------------------------
+   LOAD ALL DATA
+-------------------------------------------------- */
+async function loadAllData() {
+  loadUsers();
+  loadSites();
+  loadVideos();
+}
+
+/* --------------------------------------------------
+   USERS
+-------------------------------------------------- */
+async function loadUsers() {
+  const list = document.getElementById("usersList");
+  list.innerHTML = "";
+
+  const snap = await getDocs(collection(db, "users"));
+  snap.forEach((docSnap) => {
+    const data = docSnap.data();
+    const li = document.createElement("li");
+    li.textContent = `${docSnap.id} — Credits: ${data.credits || 0}`;
+    list.appendChild(li);
+  });
+}
+
+/* --------------------------------------------------
+   SITES
+-------------------------------------------------- */
+async function loadSites() {
+  const list = document.getElementById("sitesList");
+  list.innerHTML = "";
+
+  const snap = await getDocs(collection(db, "sites"));
+  snap.forEach((docSnap) => {
+    const data = docSnap.data();
+    const li = document.createElement("li");
+
+    li.innerHTML = `
+      <strong>${data.url}</strong><br>
+      Owner: ${data.ownerUid}<br>
+      <button data-id="${docSnap.id}" class="deleteSite">Delete</button>
+    `;
+
+    list.appendChild(li);
+  });
+
+  document.querySelectorAll(".deleteSite").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      await deleteDoc(doc(db, "sites", btn.dataset.id));
+      loadSites();
+    });
+  });
+}
+
+/* --------------------------------------------------
+   VIDEOS
+-------------------------------------------------- */
+async function loadVideos() {
+  const list = document.getElementById("videosList");
+  list.innerHTML = "";
+
+  const snap = await getDocs(collection(db, "videos"));
+  snap.forEach((docSnap) => {
+    const data = docSnap.data();
+    const li = document.createElement("li");
+
+    li.innerHTML = `
+      <strong>${data.url}</strong><br>
+      Owner: ${data.ownerUid}<br>
+      <button data-id="${docSnap.id}" class="deleteVideo">Delete</button>
+    `;
+
+    list.appendChild(li);
+  });
+
+  document.querySelectorAll(".deleteVideo").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      await deleteDoc(doc(db, "videos", btn.dataset.id));
+      loadVideos();
+    });
+  });
+}
+
+/* --------------------------------------------------
+   ADD SITE
+-------------------------------------------------- */
+document.getElementById("addSiteForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const url = document.getElementById("newSiteUrl").value.trim();
+  const ownerUid = document.getElementById("newSiteOwner").value.trim();
+
+  if (!url || !ownerUid) return;
+
+  const id = crypto.randomUUID();
+  await setDoc(doc(db, "sites", id), {
+    url,
+    ownerUid
+  });
+
+  document.getElementById("newSiteUrl").value = "";
+  document.getElementById("newSiteOwner").value = "";
+  loadSites();
+});
+
+/* --------------------------------------------------
+   ADD VIDEO
+-------------------------------------------------- */
+document.getElementById("addVideoForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const url = document.getElementById("newVideoUrl").value.trim();
+  const ownerUid = document.getElementById("newVideoOwner").value.trim();
+
+  if (!url || !ownerUid) return;
+
+  const id = crypto.randomUUID();
+  await setDoc(doc(db, "videos", id), {
+    url,
+    ownerUid
+  });
+
+  document.getElementById("newVideoUrl").value = "";
+  document.getElementById("newVideoOwner").value = "";
+  loadVideos();
+});
+
+
 
