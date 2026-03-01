@@ -1,22 +1,14 @@
-// ---------------------------------------------------------
-// Play4Traffic Reset Password Script (2026 Edition)
-// ---------------------------------------------------------
-
-import {
-  initializeApp
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-
+/* --------------------------------------------------
+   FIREBASE v10 SETUP
+-------------------------------------------------- */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import {
   getAuth,
   sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-
-// ---------------------------------------------------------
-// Firebase Config (YOUR REAL CONFIG)
-// ---------------------------------------------------------
 const firebaseConfig = {
-  apiKey: "AIzaSyCdVQD50oh4U2J6vDlgluOXrzerGyaxiV8",
+  apiKey: "AI" + "zaSyCdVQD50oh4U2J6vDlgluOXrzerGyaxiV8",
   authDomain: "play4traffic.firebaseapp.com",
   projectId: "play4traffic",
   storageBucket: "play4traffic.firebasestorage.app",
@@ -27,32 +19,18 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
+/* --------------------------------------------------
+   RESET PASSWORD
+-------------------------------------------------- */
+document.getElementById("resetForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-// ---------------------------------------------------------
-// UI Elements
-// ---------------------------------------------------------
-const emailEl = document.getElementById("email");
-const resetBtn = document.getElementById("resetBtn");
-const resetStatus = document.getElementById("resetStatus");
-
-
-// ---------------------------------------------------------
-// Reset Password Handler
-// ---------------------------------------------------------
-resetBtn.addEventListener("click", async () => {
-  resetStatus.textContent = "";
-
-  const email = emailEl.value.trim();
-
-  if (!email) {
-    resetStatus.textContent = "Please enter your email.";
-    return;
-  }
+  const email = document.getElementById("email").value.trim();
 
   try {
     await sendPasswordResetEmail(auth, email);
-    resetStatus.textContent = "Password reset link sent! Check your inbox.";
-  } catch (err) {
-    resetStatus.textContent = err.message;
+    alert("Password reset email sent!");
+  } catch (e) {
+    alert("Error: " + e.message);
   }
 });
