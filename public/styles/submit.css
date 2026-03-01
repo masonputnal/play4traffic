@@ -1,0 +1,42 @@
+/* /styles/submit.css */
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: #050510;
+  color: #fff;
+}
+
+.container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #111;
+  border-radius: 12px;
+  box-shadow: 0 0 20px #00eaff;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  border: 1px solid #00eaff;
+  background: #000;
+  color: #fff;
+}
+
+button {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background: #00eaff;
+  color: #000;
+  font-weight: bold;
+  box-shadow: 0 0 15px #00eaff;
+}
+
+#status {
+  margin-top: 10px;
+  font-size: 14px;
+}

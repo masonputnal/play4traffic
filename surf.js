@@ -290,4 +290,3 @@ function openSite(url) {
    INIT
 -------------------------------------------------- */
 loadCredits();
-

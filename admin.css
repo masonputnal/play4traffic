@@ -1,0 +1,240 @@
+/* --------------------------------------------------
+   PLAY4TRAFFIC — ADMIN PANEL STYLES
+   Matches admin.html + admin.js
+   Neon cyber dashboard aesthetic
+-------------------------------------------------- */
+
+.admin-page {
+  background: radial-gradient(circle at top, #020617, #000);
+  color: #e5e7eb;
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+}
+
+/* HEADER */
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 22px;
+  background: #020617;
+  border-bottom: 1px solid rgba(148,163,184,0.3);
+  box-shadow: 0 0 20px rgba(56,189,248,0.15);
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-mascot-circle {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg,#22d3ee,#a855f7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: #020617;
+  box-shadow: 0 0 18px rgba(34,211,238,0.6);
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.logo-main {
+  font-size: 20px;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+.logo-tagline {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.main-nav a {
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.main-nav a:hover {
+  color: #22d3ee;
+}
+
+.neon-logout-btn {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(129,140,248,0.7);
+  background: radial-gradient(circle at top left,#4f46e5,#0f172a);
+  color: #e5e7eb;
+  cursor: pointer;
+  box-shadow: 0 0 14px rgba(129,140,248,0.7);
+  transition: 0.2s;
+}
+
+.neon-logout-btn:hover {
+  box-shadow: 0 0 20px rgba(129,140,248,0.9);
+}
+
+/* MAIN LAYOUT */
+.admin-main {
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 0 20px;
+}
+
+/* TABS */
+.admin-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.admin-tab {
+  padding: 10px 18px;
+  border-radius: 10px;
+  background: #0f172a;
+  border: 1px solid rgba(148,163,184,0.4);
+  color: #e5e7eb;
+  cursor: pointer;
+  transition: 0.2s;
+  font-size: 14px;
+}
+
+.admin-tab:hover {
+  background: rgba(34,211,238,0.1);
+  border-color: #22d3ee;
+}
+
+.admin-tab.active {
+  background: linear-gradient(135deg,#22d3ee,#a855f7);
+  color: #020617;
+  border-color: transparent;
+  box-shadow: 0 0 18px rgba(34,211,238,0.6);
+}
+
+/* PANELS */
+.admin-panel {
+  background: #020617;
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid rgba(148,163,184,0.4);
+  box-shadow: 0 0 24px rgba(56,189,248,0.25);
+}
+
+.admin-panel h2 {
+  margin-bottom: 16px;
+  font-size: 20px;
+  color: #e5e7eb;
+}
+
+/* ADD FORM */
+.admin-add-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.admin-add-form input {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(148,163,184,0.4);
+  background: #0f172a;
+  color: #e5e7eb;
+}
+
+.btn-primary {
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: linear-gradient(135deg,#22d3ee,#a855f7);
+  border: none;
+  color: #020617;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 0 16px rgba(34,211,238,0.6);
+  transition: 0.2s;
+}
+
+.btn-primary:hover {
+  box-shadow: 0 0 22px rgba(34,211,238,0.9);
+}
+
+/* LISTS */
+.admin-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-item {
+  background: #0f172a;
+  border: 1px solid rgba(148,163,184,0.4);
+  padding: 14px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.item-url,
+.item-user {
+  font-size: 14px;
+  color: #e5e7eb;
+}
+
+.item-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-small {
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid rgba(148,163,184,0.4);
+  color: #e5e7eb;
+  cursor: pointer;
+  font-size: 12px;
+  transition: 0.2s;
+}
+
+.btn-small:hover {
+  background: rgba(34,211,238,0.1);
+  border-color: #22d3ee;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .admin-add-form {
+    flex-direction: column;
+  }
+
+  .admin-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .item-controls {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

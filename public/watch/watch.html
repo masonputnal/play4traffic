@@ -1,0 +1,36 @@
+<!-- /watch/watch.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Watch & Earn — Play4Traffic</title>
+    <link rel="stylesheet" href="../styles/watch.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>Watch & Earn</h1>
+
+    <div id="videoTitle"></div>
+
+    <div class="video-wrapper">
+        <div id="player"></div>
+    </div>
+
+    <div id="stats">
+        Watched: <span id="watched">0</span>/120 seconds  
+        • Earned: <span id="earned">0</span> credits  
+        • Video Pool: <span id="pool">0</span>
+    </div>
+
+    <button id="nextBtn">Next Video</button>
+    <button id="reportBtn">Report Video</button>
+
+    <div id="status"></div>
+</div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script type="module" src="../scripts/watch.js"></script>
+
+</body>
+</html>
+

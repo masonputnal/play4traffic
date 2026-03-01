@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Play4Traffic — Login</title>
+  <link rel="stylesheet" href="global.css">
+</head>
+
+<body class="home-glass-bg">
+
+<header>Play4Traffic — Login</header>
+
+<div class="container">
+
+  <div class="card">
+    <h2>Login</h2>
+
+    <!-- No form tag to prevent reload -->
+    <input id="email" type="email" placeholder="Email">
+
+    <input id="password" type="password" placeholder="Password">
+
+    <button class="btn" id="loginBtn">Login</button>
+
+    <p id="loginStatus" style="margin-top:10px; color:var(--accent);"></p>
+
+    <p style="margin-top:15px;">
+      Forgot your password?
+      <a href="reset-password.html">Reset it here</a>
+    </p>
+
+    <p style="margin-top:10px;">
+      Don’t have an account?
+      <a href="signup.html">Create one</a>
+    </p>
+  </div>
+
+</div>
+
+<!-- Must be type="module" -->
+<script type="module" src="login.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Play4Traffic — Dashboard</title>
+  <link rel="stylesheet" href="global.css">
+</head>
+
+<body class="home-glass-bg">
+
+<!-- TOP NAVIGATION BAR -->
+<nav class="top-nav">
+  <a href="dashboard.html" class="nav-item">Dashboard</a>
+  <a href="surf.html" class="nav-item">Surf</a>
+  <a href="index.html" class="nav-item">Home</a>
+  <a href="#" id="logoutBtn" class="nav-item nav-danger">Logout</a>
+
+  <!-- Admin link (hidden unless admin) -->
+  <a href="admin.html" id="adminLink" class="nav-item nav-admin" style="display:none;">Admin</a>
+</nav>
+
+<header>Play4Traffic — Dashboard</header>
+
+<div class="container">
+
+  <!-- HERO -->
+  <div class="hero">
+    <h1>Your Dashboard</h1>
+    <p>Track your credits, surfing stats, referrals, and more.</p>
+  </div>
+
+  <!-- USER STATS -->
+  <div class="home-buttons-card">
+
+    <div class="card">
+      <h2>Your Stats</h2>
+      <p><strong>Credits:</strong> <span id="creditsDisplay">0</span></p>
+      <p><strong>Sites Surfed:</strong> <span id="statSitesSurf">0</span></p>
+      <p><strong>Credits Earned:</strong> <span id="statCreditsEarned">0</span></p>
+      <p><strong>Time Surfed:</strong> <span id="statTimeSurf">0s</span></p>
+      <p><strong>Streak:</strong> <span id="statStreak">0</span></p>
+      <p><strong>Human Checks Passed:</strong> <span id="statHumanChecks">0</span></p>
+    </div>
+
+    <!-- REFERRAL SECTION -->
+    <div class="card">
+      <h2>Your Referral Link</h2>
+      <p>Share this link and earn bonus credits when users join:</p>
+      <input id="referralLink" readonly style="margin-top:10px;">
+      <button class="btn" id="copyReferralBtn" style="margin-top:10px;">Copy Link</button>
+      <p id="copyStatus" style="margin-top:10px; color:var(--accent);"></p>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="card">
+      <h2>Quick Actions</h2>
+      <button class="btn" onclick="window.location.href='surf.html'">Start Surfing</button>
+      <button class="btn" onclick="window.location.href='index.html'" style="margin-top:10px;">Go to Homepage</button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Load dashboard.js (must be module) -->
+<script type="module" src="dashboard.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,525 @@
+/* --------------------------------------------------
+   PLAY4TRAFFIC - GLOBAL STYLESHEET
+   Cleaned, organized, neon-dark theme with Poppins
+-------------------------------------------------- */
+
+/* --------------------------------------------------
+   RESET
+-------------------------------------------------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+/* --------------------------------------------------
+   GLOBALS
+-------------------------------------------------- */
+body {
+  font-family: "Poppins", sans-serif;
+  background: #0d0f12;
+  color: #e6f7ff;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+a {
+  color: #00eaff;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+a:hover {
+  color: #7df3ff;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* --------------------------------------------------
+   TYPOGRAPHY
+-------------------------------------------------- */
+h1, h2, h3, h4 {
+  font-weight: 600;
+  color: #e6f7ff;
+}
+
+p {
+  color: #cfe9f2;
+}
+
+/* --------------------------------------------------
+   LAYOUT
+-------------------------------------------------- */
+main {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.card {
+  background: #14171c;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 12px #00eaff22;
+  margin-bottom: 30px;
+}
+
+/* --------------------------------------------------
+   NAVIGATION
+-------------------------------------------------- */
+.site-header {
+  background: #111317;
+  padding: 15px 20px;
+  border-bottom: 2px solid #00eaff33;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-mascot-circle {
+  background: #00eaff22;
+  padding: 10px;
+  border-radius: 50%;
+  font-size: 24px;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-main {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.logo-tagline {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.main-nav a {
+  font-size: 16px;
+  color: #e6f7ff;
+}
+
+.main-nav a:hover {
+  color: #00eaff;
+}
+
+/* Neon Logout Button */
+.neon-logout-btn {
+  background: transparent;
+  border: 2px solid #00eaff;
+  color: #00eaff;
+  padding: 8px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: 0.25s;
+  box-shadow: 0 0 8px #00eaff88;
+}
+
+.neon-logout-btn:hover {
+  background: #00eaff;
+  color: #000;
+  box-shadow: 0 0 16px #00eaff;
+}
+
+/* --------------------------------------------------
+   BUTTONS
+-------------------------------------------------- */
+.btn, button {
+  border-radius: 10px;
+  padding: 10px 18px;
+  cursor: pointer;
+  border: none;
+  transition: 0.25s;
+  font-size: 16px;
+}
+
+.btn.primary {
+  background: #00eaff;
+  color: #000;
+  box-shadow: 0 0 10px #00eaff88;
+}
+
+.btn.primary:hover {
+  background: #7df3ff;
+}
+
+/* --------------------------------------------------
+   AUTH PAGES
+-------------------------------------------------- */
+.auth-container {
+  max-width: 420px;
+  margin: 60px auto;
+  background: #14171c;
+  padding: 30px;
+  border-radius: 14px;
+  box-shadow: 0 0 12px #00eaff33;
+  text-align: center;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 12px;
+  margin: 12px 0;
+  border-radius: 10px;
+  border: 1px solid #00eaff55;
+  background: #0f1114;
+  color: #e6f7ff;
+}
+
+.auth-btn {
+  width: 100%;
+  background: #00eaff;
+  color: #000;
+  padding: 12px;
+  border-radius: 10px;
+  margin-top: 10px;
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: 0 0 10px #00eaff88;
+}
+
+.auth-btn:hover {
+  background: #7df3ff;
+}
+
+.auth-error {
+  color: #ff4d4d;
+  margin-top: 10px;
+}
+
+/* --------------------------------------------------
+   DASHBOARD
+-------------------------------------------------- */
+.dashboard-container {
+  display: grid;
+  gap: 20px;
+}
+
+.dashboard-card {
+  background: #14171c;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 12px #00eaff22;
+}
+
+/* --------------------------------------------------
+   SURF PAGE
+-------------------------------------------------- */
+.surf-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 20px;
+}
+
+.surf-info {
+  background: #14171c;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 12px #00eaff22;
+}
+
+.surf-iframe {
+  width: 100%;
+  height: 85vh;
+  border: none;
+  border-radius: 12px;
+}
+
+/* Human Check */
+.human-check {
+  position: fixed;
+  inset: 0;
+  background: #000000cc;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.human-check.hidden {
+  display: none;
+}
+
+#blue-dot {
+  width: 40px;
+  height: 40px;
+  background: #00eaff;
+  border-radius: 50%;
+  margin-top: 20px;
+  cursor: pointer;
+}
+
+/* --------------------------------------------------
+   ADMIN PAGE
+-------------------------------------------------- */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 12px;
+  border-bottom: 1px solid #00eaff22;
+}
+
+.admin-btn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-warning {
+  background: #ffaa00;
+  color: #000;
+}
+
+.btn-danger {
+  background: #ff4d4d;
+  color: #fff;
+}
+
+/* --------------------------------------------------
+   FOOTER
+-------------------------------------------------- */
+.site-footer {
+  text-align: center;
+  padding: 20px;
+  margin-top: 40px;
+  color: #7df3ff;
+  opacity: 0.7;
+}
+
+/* --------------------------------------------------
+   DARK MODE
+-------------------------------------------------- */
+.dark-mode {
+  background: #000;
+  color: #e6f7ff;
+}
+
+.dark-mode .card,
+.dark-mode .auth-container,
+.dark-mode .surf-info {
+  background: #0d0f12;
+}
+
+/* --------------------------------------------------
+   UTILITIES
+-------------------------------------------------- */
+.hidden {
+  display: none !important;
+}
+
+/* --------------------------------------------------
+   HOMEPAGE BACKGROUND (full image + soft glow)
+-------------------------------------------------- */
+.home-bg {
+  background-image: url("https://res.cloudinary.com/dz5hkoqmw/image/upload/w_1600,f_auto,q_auto/v1772013254/Untitled_Project_-_illustrationImage_1_sgiyd7.png");
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+
+  border-radius: 16px;
+  padding: 40px 20px;
+  margin-top: 30px;
+
+  /* Soft neon glow behind image */
+  box-shadow:
+    0 0 60px rgba(0, 234, 255, 0.25),
+    0 0 120px rgba(0, 234, 255, 0.15);
+
+  position: relative;
+  overflow: hidden;
+}
+
+/* Dark overlay behind cards */
+.home-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 0;
+}
+
+/* --------------------------------------------------
+   GLASS CARDS — NO BLUR + ANIMATED SHIMMER
+-------------------------------------------------- */
+body.home .card {
+  background: rgba(20, 23, 28, 0.05); /* ultra transparent */
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: 0 0 22px rgba(0, 234, 255, 0.12);
+
+  position: relative;
+  overflow: hidden;
+  z-index: 2;
+}
+
+/* Animated shimmer */
+body.home .card::before {
+  content: "";
+  position: absolute;
+  top: -150%;
+  left: -150%;
+  width: 300%;
+  height: 300%;
+
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.10) 45%,
+    rgba(255, 255, 255, 0.18) 50%,
+    rgba(255, 255, 255, 0.10) 55%,
+    transparent 100%
+  );
+
+  opacity: 0.35;
+  transform: rotate(25deg);
+  animation: shimmerMove 6s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes shimmerMove {
+  0% {
+    transform: translateX(-40%) translateY(-40%) rotate(25deg);
+  }
+  100% {
+    transform: translateX(40%) translateY(40%) rotate(25deg);
+  }
+}
+
+/* Ensure homepage content sits above overlay */
+.home-bg > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* --------------------------------------------------
+   HOMEPAGE BUTTON OVERRIDE
+-------------------------------------------------- */
+body.home button,
+body.home .btn,
+body.home input[type="submit"],
+body.home input[type="button"] {
+  background: transparent;
+  border: 2px solid #00eaff;
+  color: #00eaff;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: 0.25s;
+  box-shadow: 0 0 8px #00eaff88;
+}
+
+body.home button:hover,
+body.home .btn:hover,
+body.home input[type="submit"]:hover,
+body.home input[type="button"]:hover {
+  background: #00eaff;
+  color: #000;
+  box-shadow: 0 0 16px #00eaff;
+}
+/* --------------------------------------------------
+   SURF PAGE - FIRESTORE READY STYLES
+   (Scoped under .surf-page)
+-------------------------------------------------- */
+
+.surf-page { background: radial-gradient(circle at top, #020617, #000); }
+
+/* HUD, viewport, sidebar styles (same as earlier premium CSS) */
+.surf-page .surf-main { max-width: 1400px; margin: 20px auto 40px; padding: 0 20px; }
+.surf-page .surf-hud { background: #020617; border-radius: 16px; border: 1px solid rgba(148,163,184,0.5); box-shadow: 0 0 24px rgba(56,189,248,0.25); padding: 14px 18px 8px; display: grid; grid-template-columns: 180px minmax(0,1fr) 220px; gap: 16px; align-items: center; margin-bottom: 18px; position: sticky; top: 10px; z-index: 10; }
+.surf-page .hud-left, .surf-page .hud-center, .surf-page .hud-right { display:flex; flex-direction:column; gap:4px; }
+.surf-page .hud-timer-label, .surf-page .hud-url-label, .surf-page .hud-credits-label { font-size:12px; text-transform:uppercase; letter-spacing:0.08em; color:#9ca3af; }
+.surf-page .hud-timer-value { font-size:22px; font-weight:600; color:#22c55e; }
+.surf-page .hud-url-value { font-size:14px; color:#e5e7eb; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.surf-page .hud-credits { display:flex; align-items:baseline; gap:6px; justify-content:flex-end; }
+.surf-page .hud-credits-value { font-size:18px; font-weight:600; color:#facc15; }
+.surf-page .hud-buy-btn { margin-top:4px; align-self:flex-end; padding:8px 16px; border-radius:999px; border:1px solid rgba(129,140,248,0.7); background:radial-gradient(circle at top left,#4f46e5,#0f172a); color:#e5e7eb; font-size:13px; cursor:pointer; box-shadow:0 0 14px rgba(129,140,248,0.7); transition:0.2s; }
+.surf-page .hud-buy-btn:hover { box-shadow:0 0 20px rgba(129,140,248,0.9); }
+
+/* Progress */
+.surf-page .hud-progress-bar { grid-column:1/4; margin-top:6px; height:6px; border-radius:999px; background:#020617; overflow:hidden; }
+.surf-page .hud-progress-fill { height:100%; width:0%; border-radius:999px; background:linear-gradient(90deg,#22d3ee,#a855f7,#22d3ee); background-size:200% 100%; animation: neonShift 6s linear infinite; }
+
+/* Layout */
+.surf-page .surf-layout-premium { display:grid; grid-template-columns: minmax(0,1.7fr) 340px; gap:20px; align-items:flex-start; }
+.surf-page .surf-viewport-wrapper { display:flex; flex-direction:column; gap:10px; }
+.surf-page .surf-viewport-neon { position:relative; border-radius:18px; padding:3px; background:linear-gradient(135deg,#22d3ee,#a855f7,#22d3ee); background-size:300% 300%; animation: neonShift 8s linear infinite; box-shadow: 0 0 30px rgba(34,211,238,0.4), 0 0 60px rgba(168,85,247,0.25); }
+.surf-page .surf-frame-neon { width:100%; height:90vh; border:none; border-radius:14px; background:#020617; }
+
+/* Loading overlay & spinner */
+.surf-page .surf-loading-overlay { position:absolute; inset:3px; border-radius:14px; background:rgba(15,23,42,0.85); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; z-index:2; }
+.surf-page .spinner-neon { width:52px; height:52px; border-radius:50%; border:4px solid rgba(148,163,184,0.2); border-top-color:#22d3ee; border-right-color:#a855f7; animation: spinnerRotate 1s linear infinite; box-shadow:0 0 18px rgba(34,211,238,0.6), 0 0 28px rgba(168,85,247,0.45); }
+.surf-page .loading-text { font-size:14px; color:#e5e7eb; letter-spacing:0.08em; text-transform:uppercase; }
+
+/* Bottom bar */
+.surf-page .surf-bottom-bar { margin-top:6px; padding:10px 12px; border-radius:12px; background:#020617; border:1px solid rgba(30,64,175,0.7); display:flex; justify-content:space-between; align-items:center; }
+.surf-page .bottom-status { font-size:13px; color:#9ca3af; }
+.surf-page .bottom-right { display:flex; gap:10px; }
+.surf-page .btn-next-site { padding:9px 20px; border-radius:999px; border:none; background:linear-gradient(90deg,#22c55e,#16a34a); color:#f9fafb; font-size:14px; cursor:pointer; box-shadow:0 0 16px rgba(34,197,94,0.7); transition:0.2s; }
+.surf-page .btn-next-site:disabled { opacity:0.4; cursor:not-allowed; box-shadow:none; }
+.surf-page .btn-skip { padding:8px 16px; border-radius:999px; border:1px solid rgba(248,250,252,0.2); background:transparent; color:#e5e7eb; font-size:13px; cursor:pointer; transition:0.2s; }
+.surf-page .btn-skip:hover { background:rgba(15,23,42,0.9); }
+
+/* Sidebar */
+.surf-page .surf-sidebar { background:#020617; border-radius:16px; border:1px solid rgba(148,163,184,0.5); box-shadow:0 0 24px rgba(56,189,248,0.25); padding:14px 14px 16px; display:flex; flex-direction:column; gap:16px; }
+.surf-page .sidebar-section h3 { font-size:15px; margin-bottom:8px; color:#e5e7eb; }
+.surf-page .stats-list, .surf-page .queue-list { list-style:none; display:flex; flex-direction:column; gap:6px; padding:0; margin:0; }
+.surf-page .stats-list li { display:flex; justify-content:space-between; font-size:13px; color:#9ca3af; }
+.surf-page .stats-list strong { color:#e5e7eb; }
+.surf-page .queue-list li { padding:6px 8px; border-radius:10px; background:#020617; border:1px solid rgba(51,65,85,0.9); font-size:12px; color:#e5e7eb; display:flex; align-items:center; gap:6px; }
+.surf-page .queue-index { width:18px; height:18px; border-radius:999px; background:linear-gradient(135deg,#22d3ee,#a855f7); display:inline-flex; align-items:center; justify-content:center; font-size:11px; color:#020617; }
+.surf-page .queue-full-btn { margin-top:6px; width:100%; padding:8px 10px; border-radius:999px; border:1px solid rgba(129,140,248,0.7); background:transparent; color:#e5e7eb; font-size:12px; cursor:pointer; transition:0.2s; }
+.surf-page .queue-full-btn:hover { background:rgba(15,23,42,0.9); }
+
+/* Modal & overlays */
+.modal-backdrop { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.6); z-index:60; }
+.modal-backdrop .modal-content { width:min(920px,95%); background:#0b1220; border-radius:12px; padding:18px; border:1px solid rgba(129,140,248,0.6); box-shadow:0 8px 40px rgba(10,10,20,0.6); color:#e5e7eb; }
+.modal-backdrop .packages { display:flex; gap:12px; flex-wrap:wrap; margin-top:12px; }
+.package-card { padding:12px; border-radius:10px; background:#071025; border:1px solid rgba(51,65,85,0.9); width:220px; }
+.package-card .pkg-title { font-weight:600; color:#e5e7eb; }
+.package-card .pkg-price { color:#facc15; margin-top:6px; }
+.pay-btn { margin-top:8px; padding:8px 10px; border-radius:8px; border:none; cursor:pointer; background:linear-gradient(90deg,#6366f1,#ec4899); color:#fff; }
+
+/* Human check overlay */
+.human-check-overlay { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.6); z-index:70; }
+.human-check-card { background:#071025; padding:20px; border-radius:12px; border:1px solid rgba(168,85,247,0.5); color:#e5e7eb; width:360px; text-align:center; }
+
+/* Hidden utility */
+.hidden { display:none !important; }
+
+/* Animations */
+@keyframes neonShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+@keyframes spinnerRotate { to { transform: rotate(360deg); } }
+
+/* Responsive */
+@media (max-width:1024px) { .surf-page .surf-layout-premium { grid-template-columns: 1fr; } .surf-page .surf-sidebar { order:-1; } }
+@media (max-width:768px) { .surf-page .surf-hud { grid-template-columns:1fr; } .surf-page .surf-frame-neon { height:70vh; } }

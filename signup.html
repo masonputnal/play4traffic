@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Play4Traffic — Sign Up</title>
+  <link rel="stylesheet" href="global.css">
+</head>
+
+<body class="home-glass-bg">
+
+<header>Play4Traffic — Create Your Account</header>
+
+<div class="container">
+
+  <div class="card">
+    <h2>Sign Up</h2>
+
+    <!-- IMPORTANT: No <form> tag to prevent page reload -->
+    <input id="email" type="email" placeholder="Email">
+
+    <input id="password" type="password" placeholder="Password">
+
+    <input id="confirmPassword" type="password" placeholder="Confirm Password">
+
+    <button class="btn" id="signupBtn">Create Account</button>
+
+    <p id="signupStatus" style="margin-top:10px; color:var(--accent);"></p>
+
+    <p style="margin-top:15px;">
+      Already have an account?
+      <a href="login.html">Login</a>
+    </p>
+  </div>
+
+</div>
+
+<!-- MUST be type="module" -->
+<script type="module" src="signup.js"></script>
+
+</body>
+</html>

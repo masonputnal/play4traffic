@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Play4Traffic — Admin Panel</title>
+  <link rel="stylesheet" href="global.css">
+</head>
+
+<body class="home-glass-bg">
+
+<!-- TOP NAVIGATION BAR -->
+<nav class="top-nav">
+  <a href="dashboard.html" class="nav-item">Dashboard</a>
+  <a href="surf.html" class="nav-item">Surf</a>
+  <a href="index.html" class="nav-item">Home</a>
+  <a href="#" id="logoutBtn" class="nav-item nav-danger">Logout</a>
+</nav>
+
+<header>Play4Traffic — Admin Panel</header>
+
+<div class="container">
+
+  <div class="hero">
+    <h1>Admin Control Center</h1>
+    <p>Manage sites, videos, Roblox games, users, and reports.</p>
+  </div>
+
+  <!-- ADMIN TABS -->
+  <div class="admin-tabs">
+    <button class="admin-tab" id="tabSites">Sites</button>
+    <button class="admin-tab" id="tabVideos">Videos</button>
+    <button class="admin-tab" id="tabRoblox">Roblox</button>
+    <button class="admin-tab" id="tabUsers">Users</button>
+    <button class="admin-tab" id="tabReports">Reports</button>
+  </div>
+
+  <!-- PANELS -->
+  <div class="admin-panel" id="panelSites" style="display:none;">
+    <h2>Manage Sites</h2>
+    <p>Coming soon…</p>
+  </div>
+
+  <div class="admin-panel" id="panelVideos" style="display:none;">
+    <h2>Manage Videos</h2>
+    <p>Coming soon…</p>
+  </div>
+
+  <div class="admin-panel" id="panelRoblox" style="display:none;">
+    <h2>Manage Roblox Games</h2>
+    <p>Coming soon…</p>
+  </div>
+
+  <div class="admin-panel" id="panelUsers" style="display:none;">
+    <h2>Manage Users</h2>
+    <p>Coming soon…</p>
+  </div>
+
+  <div class="admin-panel" id="panelReports" style="display:none;">
+    <h2>Reports & Abuse</h2>
+    <p>Coming soon…</p>
+  </div>
+
+</div>
+
+<!-- Load admin.js -->
+<script type="module" src="admin.js"></script>
+
+</body>
+</html>

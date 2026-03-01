@@ -1,0 +1,46 @@
+/* /styles/watch.css */
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: #050510;
+  color: #fff;
+}
+
+.container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #111;
+  border-radius: 12px;
+  box-shadow: 0 0 20px #00eaff;
+}
+
+.video-wrapper {
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  margin-top: 20px;
+}
+
+.video-wrapper iframe {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+button {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background: #00eaff;
+  color: #000;
+  font-weight: bold;
+  margin-right: 10px;
+  box-shadow: 0 0 15px #00eaff;
+}
+
+#status {
+  margin-top: 10px;
+  font-size: 14px;
+}

@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Play4Traffic — Profile</title>
+
+<style>
+/* THEME VARIABLES */
+:root {
+    --bg: #0a0a0f;
+    --card-bg: #111;
+    --text: #fff;
+    --glow: #00eaff;
+}
+body.light {
+    --bg: #f5f5f5;
+    --card-bg: #ffffff;
+    --text: #000;
+    --glow: #007a99;
+}
+
+/* GLOBAL */
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* HEADER */
+.header {
+    padding: 20px;
+    text-align: center;
+    font-size: 28px;
+    font-weight: bold;
+    background: var(--card-bg);
+    border-bottom: 2px solid var(--glow);
+    box-shadow: 0 0 15px var(--glow);
+}
+
+/* TOP BUTTONS */
+.top-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px auto;
+    max-width: 900px;
+    padding: 0 20px;
+}
+.back-btn {
+    padding: 10px 20px;
+    background: var(--glow);
+    color: #000;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 8px;
+    box-shadow: 0 0 15px var(--glow);
+    transition: 0.2s;
+}
+.back-btn:hover {
+    transform: scale(1.05);
+}
+.theme-toggle {
+    padding: 10px 14px;
+    background: var(--card-bg);
+    border: 1px solid var(--glow);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: var(--glow);
+    box-shadow: 0 0 15px var(--glow);
+    transition: 0.2s;
+}
+.theme-toggle:hover {
+    transform: scale(1.1);
+}
+
+/* CONTAINER */
+.container {
+    max-width: 900px;
+    margin: 20px auto 60px;
+    padding: 20px;
+}
+
+/* PROFILE CARD */
+.profile-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 0 20px var(--glow);
+}
+.avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid var(--glow);
+    box-shadow: 0 0 15px var(--glow);
+    margin-bottom: 15px;
+    object-fit: cover;
+}
+.username {
+    font-size: 26px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+.edit-btn {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background: var(--glow);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #000;
+    box-shadow: 0 0 15px var(--glow);
+    transition: 0.2s;
+}
+.edit-btn:hover {
+    transform: scale(1.05);
+}
+
+/* STATS GRID */
+.stats-grid {
+    margin-top: 30px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+.stat-box {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 0 15px var(--glow);
+}
+.stat-value {
+    font-size: 32px;
+    font-weight: bold;
+    color: var(--glow);
+}
+
+/* BADGES */
+.badges {
+    margin-top: 40px;
+    padding: 20px;
+    background: var(--card-bg);
+    border-radius: 10px;
+    box-shadow: 0 0 15px var(--glow);
+}
+.badge-list {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+.badge {
+    width: 70px;
+    height: 70px;
+    background: #222;
+    border-radius: 10px;
+    box-shadow: 0 0 10px var(--glow);
+}
+
+/* REFERRAL */
+.referral-box {
+    margin-top: 40px;
+    padding: 20px;
+    background: var(--card-bg);
+    border-radius: 10px;
+    box-shadow: 0 0 15px var(--glow);
+}
+.copy-btn {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background: var(--glow);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #000;
+    box-shadow: 0 0 15px var(--glow);
+}
+
+/* CREDIT HISTORY */
+.history-box {
+    margin-top: 40px;
+    padding: 20px;
+    background: var(--card-bg);
+    border-radius: 10px;
+    box-shadow: 0 0 15px var(--glow);
+}
+.history-list {
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+.history-item {
+    padding: 10px;
+    margin-bottom: 10px;
+    background: #1a1a1a;
+    border-radius: 8px;
+    box-shadow: 0 0 10px var(--glow);
+}
+
+/* MODAL */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    justify-content: center;
+    align-items: center;
+}
+.modal-content {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 10px;
+    width: 300px;
+    box-shadow: 0 0 20px var(--glow);
+}
+.modal-content label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 14px;
+}
+.modal-content input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 12px;
+    border-radius: 6px;
+    border: 1px solid var(--glow);
+    background: #000;
+    color: var(--text);
+}
+.modal-content input[type="file"] {
+    margin-bottom: 12px;
+    color: var(--text);
+}
+.save-btn, .close-btn {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+.save-btn {
+    background: var(--glow);
+    color: #000;
+}
+.close-btn {
+    background: #444;
+    color: #fff;
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    .top-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .profile-card {
+        padding: 15px;
+    }
+    .stat-value {
+        font-size: 26px;
+    }
+    .badge {
+        width: 60px;
+        height: 60px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">Your Profile</div>
+
+<div class="top-buttons">
+    <a href="dashboard.html" class="back-btn">← Back to Dashboard</a>
+    <button id="theme-toggle" class="theme-toggle">🌙</button>
+</div>
+
+<div class="container">
+
+    <!-- PROFILE CARD -->
+    <div class="profile-card">
+        <img src="" class="avatar" id="avatar">
+        <div class="username" id="username">Loading...</div>
+        <button class="edit-btn">Edit Profile</button>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+        <div class="stat-box">
+            <div class="stat-value" id="credits">0</div>
+            Credits
+        </div>
+        <div class="stat-box">
+            <div class="stat-value" id="sitesViewed">0</div>
+            Sites Viewed
+        </div>
+        <div class="stat-box">
+            <div class="stat-value" id="referrals">0</div>
+            Referrals
+        </div>
+        <div class="stat-box">
+            <div class="stat-value" id="dailyBonus">0</div>
+            Daily Bonus
+        </div>
+    </div>
+
+    <!-- BADGES -->
+    <div class="badges">
+        <h2>Badges</h2>
+        <div class="badge-list" id="badgeList"></div>
+    </div>
+
+    <!-- REFERRAL -->
+    <div class="referral-box">
+        <h2>Your Referral Link</h2>
+        <div id="refLink">Loading...</div>
+        <button class="copy-btn" onclick="copyReferral()">Copy</button>
+    </div>
+
+    <!-- CREDIT HISTORY -->
+    <div class="history-box">
+        <h2>Credit History</h2>
+        <div class="history-list" id="historyList"></div>
+    </div>
+
+</div>
+
+<!-- EDIT PROFILE MODAL -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <h2>Edit Profile</h2>
+
+        <label>Username</label>
+        <input id="editUsername" type="text">
+
+        <label>Avatar URL</label>
+        <input id="editAvatar" type="text">
+
+        <label>Upload Avatar Image</label>
+        <input id="uploadAvatar" type="file" accept="image/*">
+
+        <button class="save-btn" onclick="saveProfile()">Save</button>
+        <button class="close-btn" onclick="closeModal()">Cancel</button>
+    </div>
+</div>
+
+<script type="module">
+/* Firebase imports */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+/* YOUR FIREBASE CONFIG */
+const firebaseConfig = {
+  apiKey: "AIzaSyCdVQD50oh4U2J6vDlgluOXrzerGyaxiV8",
+  authDomain: "play4traffic.firebaseapp.com",
+  projectId: "play4traffic",
+  storageBucket: "play4traffic.firebasestorage.app",
+  messagingSenderId: "82841843986",
+  appId: "1:82841843986:web:beb2ae3944b10ba3521bcb"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+/* DOM refs */
+const avatarEl = document.getElementById("avatar");
+const usernameEl = document.getElementById("username");
+const creditsEl = document.getElementById("credits");
+const sitesViewedEl = document.getElementById("sitesViewed");
+const referralsEl = document.getElementById("referrals");
+const dailyBonusEl = document.getElementById("dailyBonus");
+const badgeListEl = document.getElementById("badgeList");
+const historyListEl = document.getElementById("historyList");
+const refLinkEl = document.getElementById("refLink");
+const modal = document.getElementById("editModal");
+const editUsernameInput = document.getElementById("editUsername");
+const editAvatarInput = document.getElementById("editAvatar");
+const uploadAvatarInput = document.getElementById("uploadAvatar");
+const themeToggle = document.getElementById("theme-toggle");
+
+/* Copy referral */
+function copyReferral() {
+    const text = refLinkEl.innerText;
+    navigator.clipboard.writeText(text);
+    alert("Referral link copied!");
+}
+window.copyReferral = copyReferral;
+
+/* Theme toggle */
+if (localStorage.getItem("theme") === "light") {
+    document.body.classList.add("light");
+    themeToggle.textContent = "🌙";
+}
+themeToggle.addEventListener("click", () => {
+    document.body.classList.toggle("light");
+    if (document.body.classList.contains("light")) {
+        localStorage.setItem("theme", "light");
+        themeToggle.textContent = "🌙";
+    } else {
+        localStorage.setItem("theme", "dark");
+        themeToggle.textContent = "☀️";
+    }
+});
+
+/* Modal open/close */
+document.querySelector(".edit-btn").addEventListener("click", () => {
+    editUsernameInput.value = usernameEl.textContent;
+    editAvatarInput.value = avatarEl.src;
+    modal.style.display = "flex";
+});
+function closeModal() {
+    modal.style.display = "none";
+}
+window.closeModal = closeModal;
+
+/* Avatar upload preview (local only) */
+uploadAvatarInput.addEventListener("change", (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        avatarEl.src = e.target.result;
+        editAvatarInput.value = e.target.result;
+    };
+    reader.readAsDataURL(file);
+});
+
+/* Badges from Firestore */
+function loadBadgesFromFirestore(badges) {
+    badgeListEl.innerHTML = "";
+    if (!badges || badges.length === 0) {
+        badgeListEl.innerHTML = "<p>No badges yet.</p>";
+        return;
+    }
+    const colors = {
+        firstSurf: "#00eaff",
+        "100Credits": "#ff00ff",
+        verified: "#00ff88"
+    };
+    badges.forEach(id => {
+        const div = document.createElement("div");
+        div.className = "badge";
+        const color = colors[id] || "#00eaff";
+        div.style.boxShadow = `0 0 15px ${color}`;
+        div.style.border = `2px solid ${color}`;
+        div.title = id;
+        badgeListEl.appendChild(div);
+    });
+}
+
+/* Credit history from Firestore */
+function loadHistoryFromFirestore(history) {
+    historyListEl.innerHTML = "";
+    if (!history || history.length === 0) {
+        historyListEl.innerHTML = "<p>No credit history yet.</p>";
+        return;
+    }
+    history.forEach(entry => {
+        const div = document.createElement("div");
+        div.className = "history-item";
+        div.innerHTML = `
+            <strong>+${entry.amount} credits</strong><br>
+            <small>${entry.reason}</small><br>
+            <small>${entry.date}</small>
+        `;
+        historyListEl.appendChild(div);
+    });
+}
+
+/* Save profile edits */
+async function saveProfile() {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const newName = editUsernameInput.value;
+    const newAvatar = editAvatarInput.value;
+
+    const ref = doc(db, "users", user.uid);
+    await updateDoc(ref, {
+        username: newName,
+        avatarUrl: newAvatar
+    });
+
+    usernameEl.textContent = newName;
+    avatarEl.src = newAvatar;
+    modal.style.display = "none";
+}
+window.saveProfile = saveProfile;
+
+/* Auth + Firestore load */
+onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    const ref = doc(db, "users", user.uid);
+    const snap = await getDoc(ref);
+
+    if (!snap.exists()) {
+        usernameEl.textContent = user.email || "New User";
+        refLinkEl.textContent = "https://play4traffic.com/?ref=" + user.uid;
+        return;
+    }
+
+    const data = snap.data();
+
+    usernameEl.textContent = data.username || "Player";
+    creditsEl.textContent = data.credits ?? 0;
+    sitesViewedEl.textContent = data.sitesViewed ?? 0;
+    referralsEl.textContent = data.referrals ?? 0;
+    dailyBonusEl.textContent = data.dailyBonus ?? 0;
+    refLinkEl.textContent = data.referralLink || ("https://play4traffic.com/?ref=" + user.uid);
+
+    if (data.robloxId) {
+        avatarEl.src = `https://www.roblox.com/headshot-thumbnail/image?userId=${data.robloxId}&width=180&height=180&format=png`;
+    } else if (data.avatarUrl) {
+        avatarEl.src = data.avatarUrl;
+    }
+
+    loadBadgesFromFirestore(data.badges);
+    loadHistoryFromFirestore(data.history);
+});
+</script>
+
+</body>
+</html>
