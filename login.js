@@ -28,18 +28,15 @@ onAuthStateChanged(auth, (user) => {
 });
 
 /* --------------------------------------------------
-   LOGIN
+   LOGIN BUTTON HANDLER
 -------------------------------------------------- */
-document.getElementById("loginForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
+document.getElementById("loginBtn").addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
   const pass = document.getElementById("password").value.trim();
 
   try {
     await signInWithEmailAndPassword(auth, email, pass);
   } catch (e) {
-    alert("Login failed: " + e.message);
+    document.getElementById("loginStatus").textContent = e.message;
   }
 });
-
