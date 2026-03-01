@@ -26,13 +26,20 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 /* --------------------------------------------------
-   SIGNUP
+   SIGNUP BUTTON HANDLER
 -------------------------------------------------- */
-document.getElementById("signupForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
+document.getElementById("signupBtn").addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
   const pass = document.getElementById("password").value.trim();
+  const confirm = document.getElementById("confirmPassword").value.trim();
+  const status = document.getElementById("signupStatus");
+
+  status.textContent = "";
+
+  if (pass !== confirm) {
+    status.textContent = "Passwords do not match.";
+    return;
+  }
 
   try {
     const userCred = await createUserWithEmailAndPassword(auth, email, pass);
@@ -43,6 +50,6 @@ document.getElementById("signupForm").addEventListener("submit", async (e) => {
 
     window.location.href = "dashboard.html";
   } catch (e) {
-    alert("Signup failed: " + e.message);
+    status.textContent = e.message;
   }
 });
