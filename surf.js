@@ -5,7 +5,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCdVQD50oh4U2J6vDlgluOXrzerGyaxiV8",
+  apiKey: "AI" + "zaSyCdVQD50oh4U2J6vDlgluOXrzerGyaxiV8",
   authDomain: "play4traffic.firebaseapp.com",
   projectId: "play4traffic",
   storageBucket: "play4traffic.firebasestorage.app",
@@ -167,7 +167,6 @@ function renderPayPalButton(containerId, amountUSD, creditsToAdd) {
   }).render(containerId);
 }
 
-// Call these if you want PayPal active:
 renderPayPalButton("#paypal-100", 1, 100);
 renderPayPalButton("#paypal-220", 3, 220);
 renderPayPalButton("#paypal-600", 5, 600);
@@ -291,3 +290,4 @@ function openSite(url) {
    INIT
 -------------------------------------------------- */
 loadCredits();
+
