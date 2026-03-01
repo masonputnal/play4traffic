@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Play4Traffic — Play & Earn</title>
+  <link rel="stylesheet" href="global.css">
+
+  <style>
+    .game-wrapper {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+      background: rgba(0,0,0,0.6);
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+      text-align: center;
+    }
+    .game-iframe {
+      width: 100%;
+      height: 500px;
+      border: none;
+      border-radius: 10px;
+    }
+    #status {
+      margin-top: 15px;
+      color: var(--accent);
+      font-size: 1.1rem;
+    }
+    #cooldownTimer {
+      margin-top: 10px;
+      color: #ff6666;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+    #progressContainer {
+      width: 100%;
+      height: 20px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 10px;
+      margin-top: 20px;
+      overflow: hidden;
+    }
+    #progressBar {
+      width: 0%;
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.2s linear;
+    }
+  </style>
+</head>
+
+<body class="home-glass-bg">
+
+<nav class="top-nav">
+  <a href="dashboard.html" class="nav-item">Dashboard</a>
+  <a href="surf.html" class="nav-item">Surf</a>
+  <a href="game.html" class="nav-item">Game</a>
+  <a href="index.html" class="nav-item">Home</a>
+  <a href="#" id="logoutBtn" class="nav-item nav-danger">Logout</a>
+</nav>
+
+<header>Play4Traffic — Play & Earn</header>
+
+<div class="game-wrapper">
+
+  <!-- Adsterra 728×90 -->
+  <div style="margin-bottom:20px;">
+    <script>
+      atOptions = {
+        'key' : 'bf1fc3916a5358f4aa2b11440bd8a52e',
+        'format' : 'iframe',
+        'height' : 90,
+        'width' : 728,
+        'params' : {}
+      };
+    </script>
+    <script src="https://www.highperformanceformat.com/bf1fc3916a5358f4aa2b11440bd8a52e/invoke.js"></script>
+  </div>
+
+  <h2>Play the Game & Earn Credits</h2>
+
+  <iframe 
+    class="game-iframe"
+    src="https://plugplay.games/embed/c66b3b31090c007ab12ddabd472350186d7a2e99"
+    allowfullscreen>
+  </iframe>
+
+  <!-- Progress bar -->
+  <div id="progressContainer">
+    <div id="progressBar"></div>
+  </div>
+
+  <p id="status">Earn credits while you play…</p>
+  <p id="cooldownTimer"></p>
+
+  <!-- Adsterra referral banner -->
+  <div style="margin-top:25px;">
+    <a href="https://beta.publishers.adsterra.com/referral/9jyXdtgErR" rel="nofollow">
+      <img alt="banner" src="https://landings-cdn.adsterratech.com/referralBanners/gif/720x90_adsterra_reff.gif" />
+    </a>
+  </div>
+
+</div>
+
+<script type="module" src="game.js"></script>
+
+</body>
+</html>
