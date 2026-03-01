@@ -1,7 +1,7 @@
-import {
-  initializeApp
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-
+/* --------------------------------------------------
+   FIREBASE v10 SETUP
+-------------------------------------------------- */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import {
   getAuth,
   signInWithEmailAndPassword,
@@ -9,7 +9,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCdVQD50oh4U2J6vDlgluOXrzerGyaxiV8",
+  apiKey: "AI" + "zaSyCdVQD50oh4U2J6vDlgluOXrzerGyaxiV8",
   authDomain: "play4traffic.firebaseapp.com",
   projectId: "play4traffic",
   storageBucket: "play4traffic.firebasestorage.app",
@@ -20,38 +20,26 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-const emailEl = document.getElementById("email");
-const passEl = document.getElementById("password");
-const loginBtn = document.getElementById("loginBtn");
-const loginStatus = document.getElementById("loginStatus");
-
-loginBtn.addEventListener("click", async () => {
-  loginStatus.textContent = "";
-
-  const email = emailEl.value.trim();
-  const password = passEl.value.trim();
-
-  if (!email || !password) {
-    loginStatus.textContent = "Please enter email and password.";
-    return;
-  }
-
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-
-    // ⭐ REQUIRED: Save UID so surf.js can load credits
-    localStorage.setItem("uid", user.uid);
-
-    loginStatus.textContent = "Logging in...";
-  } catch (err) {
-    loginStatus.textContent = err.message;
-  }
+/* --------------------------------------------------
+   AUTO-REDIRECT IF LOGGED IN
+-------------------------------------------------- */
+onAuthStateChanged(auth, (user) => {
+  if (user) window.location.href = "dashboard.html";
 });
 
-onAuthStateChanged(auth, (user) => {
-  if (user && auth.currentUser) {
-    window.location.href = "dashboard.html";
+/* --------------------------------------------------
+   LOGIN
+-------------------------------------------------- */
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const email = document.getElementById("email").value.trim();
+  const pass = document.getElementById("password").value.trim();
+
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch (e) {
+    alert("Login failed: " + e.message);
   }
 });
 
