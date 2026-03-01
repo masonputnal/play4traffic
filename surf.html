@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Surf — Play4Traffic</title>
+
+  <link rel="stylesheet" href="global.css">
+  <link rel="stylesheet" href="surf.css">
+
+  <!-- PayPal + Stripe SDKs -->
+  <script src="https://www.paypal.com/sdk/js?client-id=AYVl1aGdLoqM8nq8ey1ASt3znDJWHVl6yzDEL3ABGSlfb0ei6tsZVfYLh97qOaaz8nKwKBonytvLYcyP&currency=USD"></script>
+  <script src="https://js.stripe.com/v3/"></script>
+</head>
+
+<body>
+
+<nav class="top-nav">
+  <a class="nav-item" href="index.html">Home</a>
+  <a class="nav-item active" href="surf.html">Surf</a>
+  <a class="nav-item" href="dashboard.html">Dashboard</a>
+  <a class="nav-item" href="admin.html">Admin</a>
+  <a class="nav-item nav-danger" href="logout.html">Logout</a>
+</nav>
+
+<header>Surf Websites — Earn Credits</header>
+
+<div class="container">
+
+  <div class="surf-hud">
+    <div class="hud-item">Credits: <span id="creditsDisplay">0</span></div>
+    <div style="display:flex; gap:10px;">
+      <button class="btn buy-btn" id="openBuyCredits">Buy Credits</button>
+      <button class="btn buy-btn" id="watchAdBtn">Watch Ad for Credits</button>
+    </div>
+  </div>
+
+  <div class="surf-layout">
+
+    <div class="card surf-box">
+      <h2>Surf & Earn</h2>
+
+      <p id="current-url" style="margin-bottom:10px;">Click "Start Surfing" to begin.</p>
+
+      <button class="btn" id="startBtn">Start Surfing</button>
+      <button class="btn" id="nextBtn" disabled>Next Site</button>
+
+      <div class="timer-box">
+        <span>Time Left:</span>
+        <span id="timer">0</span>s
+      </div>
+
+      <div class="credits-earned">
+        Earned: <span id="earned">0</span> credits
+      </div>
+    </div>
+
+    <div class="sidebar-ad">
+      <!-- Async sidebar ad (non-blocking) -->
+      <script async src="https://pl22651817.profitablecpmrate.com/2a/8d/0e/2a8d0e8c0d4a0c8f3c1c7b3c1c0e6c4a.js"></script>
+    </div>
+
+  </div>
+
+  <div class="card buy-credits-inline">
+    <h2>Need More Credits?</h2>
+
+    <div class="buy-grid">
+      <button class="btn buy-package" data-amount="100">Buy 100 Credits — $1</button>
+      <button class="btn buy-package" data-amount="220">Buy 220 Credits — $3</button>
+      <button class="btn buy-package" data-amount="600">Buy 600 Credits — $5</button>
+      <button class="btn buy-package" data-amount="1300">Buy 1300 Credits — $10</button>
+      <button class="btn buy-package" data-amount="2800">Buy 2800 Credits — $20</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- BUY CREDITS MODAL -->
+<div id="buyCreditsModal" class="modal">
+  <div class="modal-content card">
+    <h2>Buy Credits</h2>
+
+    <div class="buy-grid">
+      <button class="btn buy-package" data-amount="100">100 Credits — $1</button>
+      <button class="btn buy-package" data-amount="220">220 Credits — $3</button>
+      <button class="btn buy-package" data-amount="600">600 Credits — $5</button>
+      <button class="btn buy-package" data-amount="1300">1300 Credits — $10</button>
+      <button class="btn buy-package" data-amount="2800">2800 Credits — $20</button>
+    </div>
+
+    <!-- Optional PayPal containers if you want both Stripe + PayPal -->
+    <div class="paypal-grid">
+      <div id="paypal-100"></div>
+      <div id="paypal-220"></div>
+      <div id="paypal-600"></div>
+      <div id="paypal-1300"></div>
+      <div id="paypal-2800"></div>
+    </div>
+
+    <button class="btn" id="closeBuyCredits">Close</button>
+  </div>
+</div>
+
+<!-- REWARDED AD MODAL -->
+<div id="rewardedAdContainer" class="modal">
+  <div class="modal-content card" style="max-width:600px; text-align:center;">
+    <h2>Watch Ad to Earn Credits</h2>
+
+    <div id="rewardedAdSlot" style="margin-top:20px;"></div>
+
+    <p id="rewardStatus" style="margin-top:15px; opacity:0.7;">Loading ad…</p>
+
+    <button class="btn" id="closeRewardedAd" style="margin-top:20px;" disabled>Close</button>
+  </div>
+</div>
+
+<script type="module" src="surf.js?v=12"></script>
+
+</body>
+</html>
+
