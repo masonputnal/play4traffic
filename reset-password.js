@@ -20,17 +20,18 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 /* --------------------------------------------------
-   RESET PASSWORD
+   RESET PASSWORD BUTTON HANDLER
 -------------------------------------------------- */
-document.getElementById("resetForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
+document.getElementById("resetBtn").addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
+  const status = document.getElementById("resetStatus");
+
+  status.textContent = "";
 
   try {
     await sendPasswordResetEmail(auth, email);
-    alert("Password reset email sent!");
+    status.textContent = "Password reset email sent!";
   } catch (e) {
-    alert("Error: " + e.message);
+    status.textContent = e.message;
   }
 });
