@@ -7,4 +7,6 @@
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["stripe"]
-  node_version = "18"
+
+  [functions.runtime]
+    node_version = "18"
