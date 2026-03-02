@@ -11,108 +11,139 @@
     body {
       margin: 0;
       padding: 0;
-      background: url('/background.jpg') center/cover no-repeat fixed;
+      background: #0b0f17;
       font-family: 'Poppins', sans-serif;
+      color: white;
+    }
+
+    .topnav {
+      width: 100%;
+      background: rgba(0,0,0,0.4);
+      padding: 14px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid rgba(0,255,255,0.3);
+      backdrop-filter: blur(10px);
+    }
+
+    .nav-left a, .nav-right a {
+      color: #00eaff;
+      margin-right: 20px;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .nav-right a:last-child {
+      margin-right: 0;
+    }
+
+    .container {
       display: flex;
       justify-content: center;
-      padding-top: 60px;
+      margin-top: 40px;
+      gap: 40px;
+      padding-bottom: 80px;
     }
 
-    .surf-panel {
-      width: 90%;
-      max-width: 900px;
-      background: rgba(0, 0, 0, 0.45);
+    .panel {
+      background: rgba(0,0,0,0.45);
+      border: 2px solid rgba(0,255,255,0.4);
+      border-radius: 18px;
+      padding: 30px;
+      width: 420px;
       backdrop-filter: blur(14px);
-      border: 2px solid rgba(0, 255, 255, 0.4);
-      border-radius: 22px;
-      padding: 40px;
-      box-shadow: 0 0 25px rgba(0, 255, 255, 0.35);
-      color: white;
-      text-align: center;
-      margin-bottom: 80px;
+      box-shadow: 0 0 20px rgba(0,255,255,0.25);
     }
 
-    .status-text {
-      font-size: 20px;
-      margin-bottom: 20px;
+    h2 {
+      margin-top: 0;
       color: #aeefff;
-    }
-
-    .countdown-number {
-      font-size: 80px;
-      font-weight: 700;
-      color: #00eaff;
-      text-shadow: 0 0 18px #00eaff;
-      margin-bottom: 20px;
-    }
-
-    .progress-bar-container {
-      width: 100%;
-      height: 12px;
-      background: rgba(255, 255, 255, 0.12);
-      border-radius: 10px;
-      overflow: hidden;
-      margin-bottom: 25px;
-    }
-
-    .progress-bar {
-      height: 100%;
-      background: #00eaff;
-      box-shadow: 0 0 12px #00eaff;
-      width: 100%;
-      transition: width linear;
-    }
-
-    .message {
-      font-size: 18px;
-      margin-bottom: 30px;
-      color: #d8faff;
+      text-shadow: 0 0 10px #00eaff;
     }
 
     .btn {
       display: inline-block;
-      padding: 14px 34px;
+      padding: 12px 28px;
       border-radius: 999px;
-      background: rgba(0, 255, 255, 0.15);
+      background: rgba(0,255,255,0.15);
       border: 2px solid #00eaff;
       color: #00eaff;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 600;
       cursor: pointer;
       text-decoration: none;
-      box-shadow: 0 0 14px #00eaff;
-      transition: background 0.2s;
+      margin-right: 10px;
+      margin-top: 10px;
+      box-shadow: 0 0 12px #00eaff;
     }
 
     .btn:hover {
-      background: rgba(0, 255, 255, 0.25);
+      background: rgba(0,255,255,0.25);
     }
 
-    #nextSiteBtn {
-      display: none;
+    .info {
       margin-top: 20px;
+      font-size: 18px;
     }
 
-    #buyCreditsBtn {
-      margin-top: 40px;
+    .credit-btn {
+      display: block;
+      width: 100%;
+      margin-top: 12px;
+      text-align: center;
     }
   </style>
 </head>
 
 <body>
-  <div class="surf-panel">
-    <div class="status-text" id="statusText">Loading next site…</div>
 
-    <div class="countdown-number" id="countdownNumber">0</div>
+  <div class="topnav">
+    <div class="nav-left">
+      <a href="/">Home</a>
+      <a href="/surf">Surf</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/admin">Admin</a>
+      <a href="/logout">Logout</a>
+    </div>
+    <div class="nav-right">
+      <a href="#" id="buyCreditsBtnTop">Buy Credits</a>
+    </div>
+  </div>
 
-    <div class="progress-bar-container">
-      <div class="progress-bar" id="progressBar"></div>
+  <div class="container">
+
+    <!-- LEFT PANEL -->
+    <div class="panel">
+      <h2>Surf & Earn</h2>
+
+      <div class="info">
+        Surfing: <span id="currentUrl">None</span>
+      </div>
+
+      <button class="btn" id="startSurfBtn">Start Surfing</button>
+      <button class="btn" id="nextSiteBtn" style="display:none;">Next Site</button>
+
+      <div class="info">
+        Time Left: <span id="timeLeft">0</span>s
+      </div>
+
+      <div class="info">
+        Earned: <span id="earnedCredits">0</span> credits
+      </div>
     </div>
 
-    <div class="message" id="messageText">Opening in a new tab…</div>
+    <!-- RIGHT PANEL -->
+    <div class="panel">
+      <h2>Need More Credits?</h2>
 
-    <button class="btn" id="nextSiteBtn">Next Site</button>
-    <button class="btn" id="buyCreditsBtn">Buy Credits</button>
+      <button class="btn credit-btn" id="buy100">Buy 100 Credits — $1</button>
+      <button class="btn credit-btn" id="buy220">Buy 220 Credits — $3</button>
+      <button class="btn credit-btn" id="buy600">Buy 600 Credits — $5</button>
+      <button class="btn credit-btn" id="buy1300">Buy 1300 Credits — $10</button>
+      <button class="btn credit-btn" id="buy2800">Buy 2800 Credits — $20</button>
+    </div>
+
   </div>
 
   <script type="module" src="/surf.js"></script>

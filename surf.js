@@ -1,7 +1,7 @@
 // --- Firebase Setup ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
-  getFirestore, collection, getDocs, doc, updateDoc
+  getFirestore, collection, getDocs, doc, updateDoc, getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import {
   getAuth, onAuthStateChanged
@@ -21,26 +21,30 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 // --- UI Elements ---
-const statusText = document.getElementById("statusText");
-const countdownNumber = document.getElementById("countdownNumber");
-const progressBar = document.getElementById("progressBar");
-const messageText = document.getElementById("messageText");
+const currentUrl = document.getElementById("currentUrl");
+const startSurfBtn = document.getElementById("startSurfBtn");
 const nextSiteBtn = document.getElementById("nextSiteBtn");
-const buyCreditsBtn = document.getElementById("buyCreditsBtn");
+const timeLeftEl = document.getElementById("timeLeft");
+const earnedCreditsEl = document.getElementById("earnedCredits");
+
+// Stripe buttons
+const buy100 = document.getElementById("buy100");
+const buy220 = document.getElementById("buy220");
+const buy600 = document.getElementById("buy600");
+const buy1300 = document.getElementById("buy1300");
+const buy2800 = document.getElementById("buy2800");
+const buyCreditsBtnTop = document.getElementById("buyCreditsBtnTop");
 
 // --- Surf Engine State ---
 let currentDocRef = null;
 let timer = null;
 let duration = 0;
+let earned = 0;
 
 // --- Minimum Duration Rules ---
 function enforceMinimum(url, rawDuration) {
-  if (url.includes("youtube.com") || url.includes("youtu.be")) {
-    return Math.max(rawDuration, 20);
-  }
-  if (url.includes("roblox.com/games")) {
-    return Math.max(rawDuration, 30);
-  }
+  if (url.includes("youtube.com") || url.includes("youtu.be")) return Math.max(rawDuration, 20);
+  if (url.includes("roblox.com/games")) return Math.max(rawDuration, 30);
   return Math.max(rawDuration, 10);
 }
 
@@ -66,34 +70,21 @@ async function getNextItem() {
 // --- Start Surf Cycle ---
 async function startSurf() {
   const item = await getNextItem();
-
   if (!item) {
-    statusText.textContent = "No active promotions available.";
-    countdownNumber.textContent = "0";
-    progressBar.style.width = "0%";
-    nextSiteBtn.style.display = "none";
+    currentUrl.textContent = "No active promotions.";
     return;
   }
 
   currentDocRef = item.ref;
+  currentUrl.textContent = item.url;
 
   const rawDuration = item.duration || 10;
   duration = enforceMinimum(item.url, rawDuration);
 
-  statusText.textContent = item.title || "Surfing…";
-  countdownNumber.textContent = duration;
-  messageText.textContent = "Opened in a new tab…";
+  timeLeftEl.textContent = duration;
+  nextSiteBtn.style.display = "none";
 
   window.open(item.url, "_blank");
-
-  nextSiteBtn.style.display = "none";
-  progressBar.style.transition = "none";
-  progressBar.style.width = "100%";
-
-  setTimeout(() => {
-    progressBar.style.transition = `width ${duration}s linear`;
-    progressBar.style.width = "0%";
-  }, 50);
 
   runTimer();
 }
@@ -101,39 +92,63 @@ async function startSurf() {
 // --- Timer Logic ---
 function runTimer() {
   let timeLeft = duration;
-  countdownNumber.textContent = timeLeft;
+  timeLeftEl.textContent = timeLeft;
 
   timer = setInterval(async () => {
     timeLeft--;
-    countdownNumber.textContent = timeLeft;
+    timeLeftEl.textContent = timeLeft;
 
     if (timeLeft <= 0) {
       clearInterval(timer);
       nextSiteBtn.style.display = "inline-block";
 
+      const snap = await getDoc(currentDocRef);
+      const data = snap.data();
+
+      const newCredits = Math.max(0, data.creditsLeft - 1);
+
       await updateDoc(currentDocRef, {
-        creditsLeft: Math.max(0, (await currentDocRef.get()).data().creditsLeft - 1),
-        active: (await currentDocRef.get()).data().creditsLeft - 1 > 0
+        creditsLeft: newCredits,
+        active: newCredits > 0
       });
+
+      earned++;
+      earnedCreditsEl.textContent = earned;
     }
   }, 1000);
 }
 
 // --- Next Site Button ---
-nextSiteBtn.addEventListener("click", () => {
-  startSurf();
-});
+nextSiteBtn.addEventListener("click", startSurf);
 
-// --- Buy Credits Button ---
-buyCreditsBtn.addEventListener("click", () => {
-  window.location.href = "/buy-credits";
-});
+// --- Start Surf Button ---
+startSurfBtn.addEventListener("click", startSurf);
+
+// --- Stripe Checkout ---
+async function startCheckout(priceId) {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const res = await fetch("/.netlify/functions/create-checkout-session", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ priceId, uid: user.uid })
+  });
+
+  const data = await res.json();
+  window.location.href = data.url;
+}
+
+buy100.onclick = () => startCheckout("price_1T4YZPQeHhafnMhGqcJZsjs8");
+buy220.onclick = () => startCheckout("price_1T4YlNQeHhafnMhGuZxTm8SO");
+buy600.onclick = () => startCheckout("price_1T4YzvQeHhafnMhGp9yzzM4O");
+buy1300.onclick = () => startCheckout("price_1T4Z3sQeHhafnMhGbTgBYywg");
+buy2800.onclick = () => startCheckout("price_1T4Z7fQeHhafnMhGu5sJj5z4");
+buyCreditsBtnTop.onclick = () => startCheckout("price_1T4YZPQeHhafnMhGqcJZsjs8");
 
 // --- Auth Gate ---
 onAuthStateChanged(auth, user => {
-  if (!user) {
-    window.location.href = "/login";
-    return;
-  }
-  startSurf();
+  if (!user) window.location.href = "/login";
 });
+
+
