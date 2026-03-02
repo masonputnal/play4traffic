@@ -11,3 +11,9 @@
 
   [functions.runtime]
     node_version = "18"
+
+[[redirects]]
+  from = "/.netlify/functions/create-checkout-session"
+  to = "/.netlify/functions/create-checkout-session"
+  status = 200
+  force = true
