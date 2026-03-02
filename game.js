@@ -28,13 +28,19 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+/* --------------------------------------------------
+   ELEMENTS
+-------------------------------------------------- */
 const statusEl = document.getElementById("status");
 const cooldownEl = document.getElementById("cooldownTimer");
+const sessionTimerEl = document.getElementById("sessionTimer");
 const progressBar = document.getElementById("progressBar");
+const loadingOverlay = document.getElementById("gameLoadingOverlay");
 
 let uid = null;
 let earningInterval = null;
 let progressInterval = null;
+let sessionCountdownInterval = null;
 
 const EARN_INTERVAL = 20000; // 20 seconds
 const SESSION_LENGTH = 30 * 60 * 1000; // 30 minutes
@@ -50,6 +56,19 @@ onAuthStateChanged(auth, async (user) => {
   }
   uid = user.uid;
   await initEarningState();
+});
+
+/* --------------------------------------------------
+   GAME LOADING OVERLAY
+-------------------------------------------------- */
+const iframe = document.querySelector(".game-iframe");
+
+iframe.addEventListener("load", () => {
+  setTimeout(() => {
+    loadingOverlay.style.opacity = "0";
+    loadingOverlay.style.transition = "opacity 0.6s ease";
+    setTimeout(() => loadingOverlay.remove(), 600);
+  }, 800);
 });
 
 /* --------------------------------------------------
@@ -80,7 +99,7 @@ async function initEarningState() {
 }
 
 /* --------------------------------------------------
-   START EARNING + PROGRESS BAR
+   START EARNING + PROGRESS BAR + SESSION TIMER
 -------------------------------------------------- */
 function startEarning(sessionStart) {
   statusEl.textContent = "Earning credits…";
@@ -88,17 +107,34 @@ function startEarning(sessionStart) {
   let progress = 0;
   progressBar.style.width = "0%";
 
-  // Progress bar animation
+  /* Progress bar animation */
   progressInterval = setInterval(() => {
     if (document.hidden) return;
 
-    progress += 100 / (EARN_INTERVAL / 200); // update every 200ms
+    progress += 100 / (EARN_INTERVAL / 200);
     if (progress >= 100) progress = 100;
 
     progressBar.style.width = progress + "%";
   }, 200);
 
-  // Credit earning loop
+  /* Session countdown */
+  sessionCountdownInterval = setInterval(() => {
+    const now = Date.now();
+    const remaining = SESSION_LENGTH - (now - sessionStart);
+
+    if (remaining <= 0) {
+      sessionTimerEl.textContent = "Session ended.";
+      beginCooldown();
+      return;
+    }
+
+    const mins = Math.floor(remaining / 60000);
+    const secs = Math.floor((remaining % 60000) / 1000);
+
+    sessionTimerEl.textContent = `Session time left: ${mins}m ${secs}s`;
+  }, 1000);
+
+  /* Credit earning loop */
   earningInterval = setInterval(async () => {
     if (document.hidden) return;
 
@@ -129,6 +165,7 @@ function startEarning(sessionStart) {
 async function beginCooldown() {
   clearInterval(earningInterval);
   clearInterval(progressInterval);
+  clearInterval(sessionCountdownInterval);
 
   const cooldownEnd = Date.now() + COOLDOWN_LENGTH;
 
@@ -145,6 +182,7 @@ async function beginCooldown() {
 function startCooldown(cooldownEnd) {
   statusEl.textContent = "Cooldown active — you cannot earn right now.";
   progressBar.style.width = "0%";
+  sessionTimerEl.textContent = "";
 
   const timer = setInterval(() => {
     const now = Date.now();
