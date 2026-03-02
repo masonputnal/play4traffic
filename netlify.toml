@@ -3,3 +3,8 @@
 
 [build.environment]
   NETLIFY_SKIP_SECRETS_SCAN = "true"
+
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["stripe"]
+  node_version = "18"
