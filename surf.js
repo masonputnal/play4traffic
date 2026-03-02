@@ -1,23 +1,14 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+// --- Firebase Setup ---
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
-  getFirestore,
-  doc,
-  getDoc,
-  updateDoc,
-  increment,
-  collection,
-  query,
-  where,
-  getDocs
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  getFirestore, collection, getDocs, doc, updateDoc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import {
-  getAuth,
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  getAuth, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "AI" + "zaSyCdVQD50oh4U2J6vDlgluOXrzerGyaxiV8",
+  apiKey: "AIzaSyCdVQD50oh4U2J6vDlgluOXrzerGyaxiV8",
   authDomain: "play4traffic.firebaseapp.com",
   projectId: "play4traffic",
   storageBucket: "play4traffic.firebasestorage.app",
@@ -29,135 +20,120 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-const iframe = document.getElementById("surfFrame");
-const statusEl = document.getElementById("surfStatus");
-const timerEl = document.getElementById("surfTimer");
+// --- UI Elements ---
+const statusText = document.getElementById("statusText");
+const countdownNumber = document.getElementById("countdownNumber");
+const progressBar = document.getElementById("progressBar");
+const messageText = document.getElementById("messageText");
+const nextSiteBtn = document.getElementById("nextSiteBtn");
+const buyCreditsBtn = document.getElementById("buyCreditsBtn");
 
-let currentUser = null;
-let currentLink = null;
-let countdownInterval = null;
+// --- Surf Engine State ---
+let currentDocRef = null;
+let timer = null;
+let duration = 0;
 
-const VIEW_TIME = 15000; // 15s per view, adjust as needed
-
-const perViewCosts = {
-  site: 1,
-  youtube: 2,
-  roblox: 3
-};
-
-const perViewRewards = {
-  site: 1,
-  youtube: 2,
-  roblox: 3
-};
-
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.href = "login.html";
-    return;
+// --- Minimum Duration Rules ---
+function enforceMinimum(url, rawDuration) {
+  if (url.includes("youtube.com") || url.includes("youtu.be")) {
+    return Math.max(rawDuration, 20);
   }
-  currentUser = user;
-  await loadNextLink();
-});
-
-document.getElementById("logoutBtn")?.addEventListener("click", () => {
-  signOut(auth);
-});
-
-async function loadNextLink() {
-  clearInterval(countdownInterval);
-  statusEl.textContent = "Loading next site…";
-  timerEl.textContent = "";
-
-  const q = query(
-    collection(db, "promotedLinks"),
-    where("active", "==", true)
-  );
-  const snap = await getDocs(q);
-
-  const candidates = [];
-  snap.forEach(docSnap => {
-    const d = docSnap.data();
-    if (d.credits > 0) {
-      candidates.push({ id: docSnap.id, ...d });
-    }
-  });
-
-  if (candidates.length === 0) {
-    statusEl.textContent = "No active promotions available right now.";
-    iframe.src = "about:blank";
-    return;
+  if (url.includes("roblox.com/games")) {
+    return Math.max(rawDuration, 30);
   }
-
-  currentLink = candidates[Math.floor(Math.random() * candidates.length)];
-  iframe.src = currentLink.url;
-  statusEl.textContent = "Viewing promoted link…";
-
-  startCountdown();
+  return Math.max(rawDuration, 10);
 }
 
-function startCountdown() {
-  let remaining = VIEW_TIME / 1000;
-  timerEl.textContent = `Time left: ${remaining}s`;
+// --- Fetch Next Item (Sites → Videos → Games) ---
+async function getNextItem() {
+  const collections = ["sites", "videos", "games"];
 
-  countdownInterval = setInterval(() => {
-    remaining--;
-    if (remaining <= 0) {
-      clearInterval(countdownInterval);
-      handleViewComplete();
-    } else {
-      timerEl.textContent = `Time left: ${remaining}s`;
-    }
-  }, 1000);
+  for (const colName of collections) {
+    const colRef = collection(db, colName);
+    const snap = await getDocs(colRef);
+
+    const items = snap.docs
+      .map(d => ({ id: d.id, ref: d.ref, ...d.data() }))
+      .filter(d => d.active && d.creditsLeft > 0)
+      .sort((a, b) => a.order - b.order);
+
+    if (items.length > 0) return items[0];
+  }
+
+  return null;
 }
 
-async function handleViewComplete() {
-  if (!currentLink || !currentUser) {
-    await loadNextLink();
+// --- Start Surf Cycle ---
+async function startSurf() {
+  const item = await getNextItem();
+
+  if (!item) {
+    statusText.textContent = "No active promotions available.";
+    countdownNumber.textContent = "0";
+    progressBar.style.width = "0%";
+    nextSiteBtn.style.display = "none";
     return;
   }
 
-  const type = currentLink.type;
-  const cost = perViewCosts[type] || 1;
-  const reward = perViewRewards[type] || 1;
+  currentDocRef = item.ref;
 
-  try {
-    // reward surfer
-    const userRef = doc(db, "users", currentUser.uid);
-    await updateDoc(userRef, {
-      credits: increment(reward),
-      sitesSurf: increment(1),
-      creditsEarned: increment(reward),
-      timeSurf: increment(VIEW_TIME / 1000)
-    });
+  const rawDuration = item.duration || 10;
+  duration = enforceMinimum(item.url, rawDuration);
 
-    // deduct from owner
-    const ownerRef = doc(db, "users", currentLink.owner);
-    const ownerSnap = await getDoc(ownerRef);
-    const ownerData = ownerSnap.data() || {};
-    const ownerCredits = ownerData.credits || 0;
-    const newOwnerCredits = Math.max(0, ownerCredits - cost);
+  statusText.textContent = item.title || "Surfing…";
+  countdownNumber.textContent = duration;
+  messageText.textContent = "Opened in a new tab…";
 
-    await updateDoc(ownerRef, {
-      credits: newOwnerCredits
-    });
+  window.open(item.url, "_blank");
 
-    // update link credits
-    const linkRef = doc(db, "promotedLinks", currentLink.id);
-    const newLinkCredits = Math.max(0, currentLink.credits - cost);
-    const linkUpdate = { credits: newLinkCredits };
-    if (newLinkCredits <= 0) {
-      linkUpdate.active = false;
-    }
-    await updateDoc(linkRef, linkUpdate);
-
-    statusEl.textContent = `Earned +${reward} credits!`;
-  } catch (err) {
-    console.error(err);
-    statusEl.textContent = "Error processing view.";
-  }
+  nextSiteBtn.style.display = "none";
+  progressBar.style.transition = "none";
+  progressBar.style.width = "100%";
 
   setTimeout(() => {
-    loadNextLink();
+    progressBar.style.transition = `width ${duration}s linear`;
+    progressBar.style.width = "0%";
+  }, 50);
+
+  runTimer();
+}
+
+// --- Timer Logic ---
+function runTimer() {
+  let timeLeft = duration;
+  countdownNumber.textContent = timeLeft;
+
+  timer = setInterval(async () => {
+    timeLeft--;
+    countdownNumber.textContent = timeLeft;
+
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      nextSiteBtn.style.display = "inline-block";
+
+      await updateDoc(currentDocRef, {
+        creditsLeft: Math.max(0, (await currentDocRef.get()).data().creditsLeft - 1),
+        active: (await currentDocRef.get()).data().creditsLeft - 1 > 0
+      });
+    }
   }, 1000);
 }
+
+// --- Next Site Button ---
+nextSiteBtn.addEventListener("click", () => {
+  startSurf();
+});
+
+// --- Buy Credits Button ---
+buyCreditsBtn.addEventListener("click", () => {
+  window.location.href = "/buy-credits";
+});
+
+// --- Auth Gate ---
+onAuthStateChanged(auth, user => {
+  if (!user) {
+    window.location.href = "/login";
+    return;
+  }
+  startSurf();
+});
