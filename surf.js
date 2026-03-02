@@ -1,8 +1,20 @@
-/* --------------------------------------------------
-   FIREBASE v10 SETUP
--------------------------------------------------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  updateDoc,
+  increment,
+  collection,
+  query,
+  where,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AI" + "zaSyCdVQD50oh4U2J6vDlgluOXrzerGyaxiV8",
@@ -13,280 +25,139 @@ const firebaseConfig = {
   appId: "1:82841843986:web:beb2ae3944b10ba3521bcb"
 };
 
-let db = null;
-let currentUserId = localStorage.getItem("uid") || null;
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
 
-try {
-  const app = initializeApp(firebaseConfig);
-  db = getFirestore(app);
-} catch (e) {
-  console.warn("Firebase failed to initialize:", e);
-}
+const iframe = document.getElementById("surfFrame");
+const statusEl = document.getElementById("surfStatus");
+const timerEl = document.getElementById("surfTimer");
 
-/* --------------------------------------------------
-   STRIPE CONFIG (CLIENT-SIDE)
--------------------------------------------------- */
-const stripe = Stripe("pk_live_51T4M4SQeHhafnMhGk9C0vGs496UX6zSXtag8hnr6nQG7MQzHyWLyH0pAndHbTaUjm63CU2iiegBf1q4Y3cjNJdoj00RbPeTMai");
+let currentUser = null;
+let currentLink = null;
+let countdownInterval = null;
 
-const STRIPE_PRICES = {
-  100: "price_1T4YZPQeHhafnMhGqcJZsjs8",
-  220: "price_1T4YlNQeHhafnMhGuZxTm8SO",
-  600: "price_1T4YzvQeHhafnMhGp9yzzM4O",
-  1300: "price_1T4Z3sQeHhafnMhGbTgBYywg",
-  2800: "price_1T4Z7fQeHhafnMhGu5sJj5z4"
+const VIEW_TIME = 15000; // 15s per view, adjust as needed
+
+const perViewCosts = {
+  site: 1,
+  youtube: 2,
+  roblox: 3
 };
 
-/* --------------------------------------------------
-   SURF ENGINE DATA
--------------------------------------------------- */
-let surfList = [
-  "https://example1.com",
-  "https://example2.com",
-  "https://example3.com"
-];
+const perViewRewards = {
+  site: 1,
+  youtube: 2,
+  roblox: 3
+};
 
-let index = 0;
-let timer = 0;
-let countdown;
-let earned = 0;
-let credits = 0;
-
-/* --------------------------------------------------
-   DOM ELEMENTS
--------------------------------------------------- */
-const startBtn = document.getElementById("startBtn");
-const nextBtn = document.getElementById("nextBtn");
-const timerDisplay = document.getElementById("timer");
-const earnedDisplay = document.getElementById("earned");
-const currentUrlDisplay = document.getElementById("current-url");
-const creditsDisplay = document.getElementById("creditsDisplay");
-
-const buyModal = document.getElementById("buyCreditsModal");
-const openBuy = document.getElementById("openBuyCredits");
-const closeBuy = document.getElementById("closeBuyCredits");
-const buyButtons = document.querySelectorAll(".buy-package");
-
-const rewardedAdContainer = document.getElementById("rewardedAdContainer");
-const rewardedAdSlot = document.getElementById("rewardedAdSlot");
-const rewardStatus = document.getElementById("rewardStatus");
-const closeRewardedAd = document.getElementById("closeRewardedAd");
-const watchAdBtn = document.getElementById("watchAdBtn");
-
-/* --------------------------------------------------
-   FIRESTORE LOAD/SAVE
--------------------------------------------------- */
-async function loadCredits() {
-  if (!db || !currentUserId) {
-    console.warn("Skipping credit load — no Firebase or UID");
-    creditsDisplay.textContent = credits;
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "login.html";
     return;
   }
+  currentUser = user;
+  await loadNextLink();
+});
 
-  try {
-    const ref = doc(db, "users", currentUserId);
-    const snap = await getDoc(ref);
+document.getElementById("logoutBtn")?.addEventListener("click", () => {
+  signOut(auth);
+});
 
-    credits = snap.exists() ? snap.data().credits || 0 : 0;
-    creditsDisplay.textContent = credits;
-  } catch (e) {
-    console.warn("Error loading credits:", e);
-  }
-}
+async function loadNextLink() {
+  clearInterval(countdownInterval);
+  statusEl.textContent = "Loading next site…";
+  timerEl.textContent = "";
 
-async function saveCredits() {
-  if (!db || !currentUserId) return;
+  const q = query(
+    collection(db, "promotedLinks"),
+    where("active", "==", true)
+  );
+  const snap = await getDocs(q);
 
-  try {
-    const ref = doc(db, "users", currentUserId);
-    await setDoc(ref, { credits: credits }, { merge: true });
-  } catch (e) {
-    console.warn("Error saving credits:", e);
-  }
-}
-
-/* --------------------------------------------------
-   BUY CREDITS (STRIPE CHECKOUT)
--------------------------------------------------- */
-openBuy.addEventListener("click", () => buyModal.style.display = "flex");
-closeBuy.addEventListener("click", () => buyModal.style.display = "none");
-
-buyButtons.forEach(btn => {
-  btn.addEventListener("click", async () => {
-    if (!currentUserId) {
-      alert("Please log in first.");
-      return;
-    }
-
-    const amount = parseInt(btn.dataset.amount);
-    const priceId = STRIPE_PRICES[amount];
-    if (!priceId) {
-      console.warn("No Stripe price for amount:", amount);
-      return;
-    }
-
-    try {
-      const res = await fetch("/.netlify/functions/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ priceId, uid: currentUserId })
-      });
-
-      const data = await res.json();
-      if (data.id) {
-        stripe.redirectToCheckout({ sessionId: data.id });
-      } else {
-        console.error("No session id:", data);
-      }
-    } catch (e) {
-      console.error("Stripe checkout error:", e);
+  const candidates = [];
+  snap.forEach(docSnap => {
+    const d = docSnap.data();
+    if (d.credits > 0) {
+      candidates.push({ id: docSnap.id, ...d });
     }
   });
-});
 
-/* --------------------------------------------------
-   OPTIONAL: PAYPAL BUTTONS
--------------------------------------------------- */
-function renderPayPalButton(containerId, amountUSD, creditsToAdd) {
-  if (!window.paypal) return;
-
-  paypal.Buttons({
-    createOrder: (data, actions) => {
-      return actions.order.create({
-        purchase_units: [{
-          amount: { value: amountUSD.toString() }
-        }]
-      });
-    },
-    onApprove: async (data, actions) => {
-      await actions.order.capture();
-
-      credits += creditsToAdd;
-      creditsDisplay.textContent = credits;
-      await saveCredits();
-    }
-  }).render(containerId);
-}
-
-renderPayPalButton("#paypal-100", 1, 100);
-renderPayPalButton("#paypal-220", 3, 220);
-renderPayPalButton("#paypal-600", 5, 600);
-renderPayPalButton("#paypal-1300", 10, 1300);
-renderPayPalButton("#paypal-2800", 20, 2800);
-
-/* --------------------------------------------------
-   REWARDED AD
--------------------------------------------------- */
-watchAdBtn.addEventListener("click", () => {
-  rewardedAdContainer.style.display = "flex";
-  rewardStatus.textContent = "Loading ad…";
-  closeRewardedAd.disabled = true;
-
-  rewardedAdSlot.innerHTML = "";
-
-  const script = document.createElement("script");
-  script.async = true;
-  script.src = "https://pl28612744.effectivegatecpm.com/09/a6/1e/09a61ea7b95b64df8ad23ba7ffa7f392.js";
-
-  let adLoaded = false;
-
-  script.onload = () => {
-    adLoaded = true;
-    rewardStatus.textContent = "Ad loaded. Watching…";
-
-    setTimeout(async () => {
-      const REWARD_CREDITS = 5;
-      credits += REWARD_CREDITS;
-      creditsDisplay.textContent = credits;
-      await saveCredits();
-
-      rewardStatus.textContent = `Ad completed! +${REWARD_CREDITS} credits added.`;
-      closeRewardedAd.disabled = false;
-    }, 20000);
-  };
-
-  script.onerror = () => {
-    rewardStatus.textContent = "Ad failed to load. You can close this window.";
-    closeRewardedAd.disabled = false;
-  };
-
-  setTimeout(() => {
-    if (!adLoaded) {
-      rewardStatus.textContent = "Ad took too long to load. You can close this window.";
-      closeRewardedAd.disabled = false;
-    }
-  }, 10000);
-
-  rewardedAdSlot.appendChild(script);
-});
-
-closeRewardedAd.addEventListener("click", () => {
-  rewardedAdContainer.style.display = "none";
-});
-
-/* --------------------------------------------------
-   SURF ENGINE (EARN CREDITS)
--------------------------------------------------- */
-startBtn.addEventListener("click", () => {
-  if (!currentUserId) {
-    alert("Please log in first.");
+  if (candidates.length === 0) {
+    statusEl.textContent = "No active promotions available right now.";
+    iframe.src = "about:blank";
     return;
   }
-  startSurf();
-});
 
-nextBtn.addEventListener("click", () => {
-  if (!currentUserId) {
-    alert("Please log in first.");
-    return;
-  }
-  nextSurf();
-});
+  currentLink = candidates[Math.floor(Math.random() * candidates.length)];
+  iframe.src = currentLink.url;
+  statusEl.textContent = "Viewing promoted link…";
 
-function startSurf() {
-  index = 0;
-  openSite(surfList[index]);
+  startCountdown();
 }
 
-function nextSurf() {
-  index++;
-  if (index >= surfList.length) {
-    currentUrlDisplay.textContent = "No more sites!";
-    nextBtn.disabled = true;
-    return;
-  }
-  openSite(surfList[index]);
-}
+function startCountdown() {
+  let remaining = VIEW_TIME / 1000;
+  timerEl.textContent = `Time left: ${remaining}s`;
 
-function openSite(url) {
-  window.open(url, "_blank");
-
-  currentUrlDisplay.textContent = "Surfing: " + url;
-
-  timer = 10;
-  timerDisplay.textContent = timer;
-  nextBtn.disabled = true;
-
-  clearInterval(countdown);
-  countdown = setInterval(async () => {
-    timer--;
-    timerDisplay.textContent = timer;
-
-    if (timer <= 0) {
-      clearInterval(countdown);
-      nextBtn.disabled = false;
-
-      const EARN_PER_SITE = 1;
-      earned += EARN_PER_SITE;
-      earnedDisplay.textContent = earned;
-
-      credits += EARN_PER_SITE;
-      creditsDisplay.textContent = credits;
-      await saveCredits();
+  countdownInterval = setInterval(() => {
+    remaining--;
+    if (remaining <= 0) {
+      clearInterval(countdownInterval);
+      handleViewComplete();
+    } else {
+      timerEl.textContent = `Time left: ${remaining}s`;
     }
   }, 1000);
 }
 
-/* --------------------------------------------------
-   INIT
--------------------------------------------------- */
-loadCredits();
+async function handleViewComplete() {
+  if (!currentLink || !currentUser) {
+    await loadNextLink();
+    return;
+  }
+
+  const type = currentLink.type;
+  const cost = perViewCosts[type] || 1;
+  const reward = perViewRewards[type] || 1;
+
+  try {
+    // reward surfer
+    const userRef = doc(db, "users", currentUser.uid);
+    await updateDoc(userRef, {
+      credits: increment(reward),
+      sitesSurf: increment(1),
+      creditsEarned: increment(reward),
+      timeSurf: increment(VIEW_TIME / 1000)
+    });
+
+    // deduct from owner
+    const ownerRef = doc(db, "users", currentLink.owner);
+    const ownerSnap = await getDoc(ownerRef);
+    const ownerData = ownerSnap.data() || {};
+    const ownerCredits = ownerData.credits || 0;
+    const newOwnerCredits = Math.max(0, ownerCredits - cost);
+
+    await updateDoc(ownerRef, {
+      credits: newOwnerCredits
+    });
+
+    // update link credits
+    const linkRef = doc(db, "promotedLinks", currentLink.id);
+    const newLinkCredits = Math.max(0, currentLink.credits - cost);
+    const linkUpdate = { credits: newLinkCredits };
+    if (newLinkCredits <= 0) {
+      linkUpdate.active = false;
+    }
+    await updateDoc(linkRef, linkUpdate);
+
+    statusEl.textContent = `Earned +${reward} credits!`;
+  } catch (err) {
+    console.error(err);
+    statusEl.textContent = "Error processing view.";
+  }
+
+  setTimeout(() => {
+    loadNextLink();
+  }, 1000);
+}

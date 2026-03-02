@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Play4Traffic — Promote Your Links</title>
+  <link rel="stylesheet" href="global.css" />
+  <style>
+    .promote-wrapper {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+      background: rgba(0,0,0,0.6);
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+      color: #fff;
+    }
+    .promote-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .promote-tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      border-radius: 8px;
+      cursor: pointer;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .promote-tab.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 12px rgba(0,255,200,0.6);
+    }
+    .promote-form {
+      margin-bottom: 30px;
+    }
+    .promote-form label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .promote-form input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      margin-bottom: 10px;
+    }
+    .promote-form button {
+      margin-top: 10px;
+    }
+    .promote-note {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-bottom: 10px;
+    }
+    .section-label {
+      margin-top: 25px;
+      margin-bottom: 8px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+    .section-label.active-label {
+      color: #66ffe6;
+      text-shadow: 0 0 8px rgba(102,255,230,0.9);
+    }
+    .section-label.depleted-label {
+      color: #ff8866;
+      text-shadow: 0 0 8px rgba(255,136,102,0.7);
+    }
+    .promo-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.95rem;
+    }
+    .promo-main {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .promo-meta {
+      font-size: 0.85rem;
+      opacity: 0.8;
+    }
+    .promo-actions button {
+      margin-left: 6px;
+      font-size: 0.8rem;
+      padding: 4px 8px;
+    }
+    .promo-url {
+      opacity: 0.9;
+      word-break: break-all;
+    }
+    .promo-status {
+      font-weight: 600;
+    }
+    .promo-status.active {
+      color: #66ff99;
+    }
+    .promo-status.depleted {
+      color: #ff6666;
+    }
+    .promo-status.paused {
+      color: #ffcc66;
+    }
+  </style>
+</head>
+<body class="home-glass-bg">
+<nav class="top-nav">
+  <a href="dashboard.html" class="nav-item">Dashboard</a>
+  <a href="surf.html" class="nav-item">Surf</a>
+  <a href="game.html" class="nav-item">Game</a>
+  <a href="index.html" class="nav-item">Home</a>
+  <a href="#" id="logoutBtn" class="nav-item nav-danger">Logout</a>
+</nav>
+
+<header>Play4Traffic — Promote Your Links</header>
+
+<div class="promote-wrapper">
+  <p>Your credits are used to promote your links to other surfers.</p>
+  <p id="userCredits" class="promote-note">Credits: …</p>
+
+  <div class="promote-tabs">
+    <div class="promote-tab active" data-type="site">🌐 Website</div>
+    <div class="promote-tab" data-type="youtube">▶️ YouTube</div>
+    <div class="promote-tab" data-type="roblox">🎮 Roblox</div>
+  </div>
+
+  <form id="promoteForm" class="promote-form">
+    <label for="urlInput" id="urlLabel">Website URL</label>
+    <input type="text" id="urlInput" placeholder="https://example.com" required />
+    <p id="costNote" class="promote-note">
+      Activation cost: 100 credits. This also becomes your starting credits for this link.
+    </p>
+    <button type="submit" class="btn-primary">Promote Link</button>
+    <p id="formMessage" class="promote-note"></p>
+  </form>
+
+  <h3 class="section-label active-label">Active Promotions</h3>
+  <div id="activeList"></div>
+
+  <h3 class="section-label depleted-label">Depleted / Paused Promotions</h3>
+  <div id="depletedList"></div>
+</div>
+
+<script type="module" src="promote.js"></script>
+</body>
+</html>

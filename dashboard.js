@@ -27,6 +27,16 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 /* --------------------------------------------------
+   DOM ELEMENTS
+-------------------------------------------------- */
+const creditsEl = document.getElementById("creditsDisplay");
+const sitesSurfEl = document.getElementById("statSitesSurf");
+const creditsEarnedEl = document.getElementById("statCreditsEarned");
+const timeSurfEl = document.getElementById("statTimeSurf");
+const streakEl = document.getElementById("statStreak");
+const humanChecksEl = document.getElementById("statHumanChecks");
+
+/* --------------------------------------------------
    AUTH CHECK
 -------------------------------------------------- */
 onAuthStateChanged(auth, async (user) => {
@@ -35,13 +45,13 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  loadUserStats(user.uid);
-  checkAdmin(user.uid);
+  await loadUserStats(user.uid);
   setupReferralLink(user.uid);
+  checkAdmin(user.uid);
 });
 
 /* --------------------------------------------------
-   LOAD USER STATS
+   LOAD USER STATS (LIVE)
 -------------------------------------------------- */
 async function loadUserStats(uid) {
   try {
@@ -50,14 +60,14 @@ async function loadUserStats(uid) {
 
     if (!snap.exists()) return;
 
-    const data = snap.data();
+    const d = snap.data();
 
-    document.getElementById("creditsDisplay").textContent = data.credits || 0;
-    document.getElementById("statSitesSurf").textContent = data.sitesSurf || 0;
-    document.getElementById("statCreditsEarned").textContent = data.creditsEarned || 0;
-    document.getElementById("statTimeSurf").textContent = (data.timeSurf || 0) + "s";
-    document.getElementById("statStreak").textContent = data.streak || 0;
-    document.getElementById("statHumanChecks").textContent = data.humanChecks || 0;
+    creditsEl.textContent = d.credits ?? 0;
+    sitesSurfEl.textContent = d.sitesSurf ?? 0;
+    creditsEarnedEl.textContent = d.creditsEarned ?? 0;
+    timeSurfEl.textContent = (d.timeSurf ?? 0) + "s";
+    streakEl.textContent = d.streak ?? 0;
+    humanChecksEl.textContent = d.humanChecks ?? 0;
 
   } catch (e) {
     console.warn("Error loading dashboard stats:", e);

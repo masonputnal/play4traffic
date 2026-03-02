@@ -53,3 +53,4 @@ document.getElementById("signupBtn").addEventListener("click", async () => {
     status.textContent = e.message;
   }
 });
+

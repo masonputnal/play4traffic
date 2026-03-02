@@ -183,6 +183,3 @@ document.getElementById("addVideoForm").addEventListener("submit", async (e) => 
   document.getElementById("newVideoOwner").value = "";
   loadVideos();
 });
-
-
-
