@@ -5,6 +5,7 @@
   NETLIFY_SKIP_SECRETS_SCAN = "true"
 
 [functions]
+  directory = "netlify/functions"
   node_bundler = "esbuild"
   external_node_modules = ["stripe"]
 
