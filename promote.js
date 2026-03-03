@@ -39,6 +39,7 @@ const formMessage = document.getElementById("formMessage");
 const userCreditsEl = document.getElementById("userCredits");
 const activeList = document.getElementById("activeList");
 const depletedList = document.getElementById("depletedList");
+const typeWarning = document.getElementById("typeWarning");
 
 let currentType = "site";
 let currentUser = null;
@@ -56,6 +57,36 @@ const perViewCosts = {
   roblox: 3
 };
 
+/* --------------------------------------------------
+   URL VALIDATION (UI ONLY)
+-------------------------------------------------- */
+function validateUrlForType(url, type) {
+  if (type === "site") {
+    return (
+      url.startsWith("http") &&
+      !url.includes("youtube.com") &&
+      !url.includes("youtu.be") &&
+      !url.includes("roblox.com/games")
+    );
+  }
+
+  if (type === "youtube") {
+    return (
+      url.includes("youtube.com") ||
+      url.includes("youtu.be")
+    );
+  }
+
+  if (type === "roblox") {
+    return url.includes("roblox.com/games");
+  }
+
+  return false;
+}
+
+/* --------------------------------------------------
+   AUTH
+-------------------------------------------------- */
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     window.location.href = "login.html";
@@ -70,6 +101,9 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
   signOut(auth);
 });
 
+/* --------------------------------------------------
+   TAB SWITCHING
+-------------------------------------------------- */
 tabs.forEach(tab => {
   tab.addEventListener("click", () => {
     tabs.forEach(t => t.classList.remove("active"));
@@ -83,19 +117,27 @@ function updateFormForType() {
   if (currentType === "site") {
     urlLabel.textContent = "Website URL";
     urlInput.placeholder = "https://example.com";
+    typeWarning.textContent = "Only normal websites allowed. No YouTube or Roblox links.";
   } else if (currentType === "youtube") {
     urlLabel.textContent = "YouTube Video URL";
     urlInput.placeholder = "https://www.youtube.com/watch?v=...";
+    typeWarning.textContent = "Only YouTube links allowed.";
   } else {
     urlLabel.textContent = "Roblox Game URL";
     urlInput.placeholder = "https://www.roblox.com/games/...";
+    typeWarning.textContent = "Only Roblox game links allowed.";
   }
+
   const cost = activationCosts[currentType];
   costNote.textContent =
     `Activation cost: ${cost} credits. This also becomes your starting credits for this link.`;
+
   formMessage.textContent = "";
 }
 
+/* --------------------------------------------------
+   LOAD USER CREDITS
+-------------------------------------------------- */
 async function loadUserCredits() {
   const ref = doc(db, "users", currentUser.uid);
   const snap = await getDoc(ref);
@@ -104,13 +146,17 @@ async function loadUserCredits() {
   userCreditsEl.textContent = `Credits: ${currentCredits}`;
 }
 
+/* --------------------------------------------------
+   SUBMIT PROMOTION (UI VALIDATION ADDED)
+-------------------------------------------------- */
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   formMessage.textContent = "";
 
   const url = urlInput.value.trim();
-  if (!url || !url.startsWith("http")) {
-    formMessage.textContent = "Please enter a valid URL starting with http or https.";
+
+  if (!validateUrlForType(url, currentType)) {
+    formMessage.textContent = `This URL does not match the selected type (${currentType}).`;
     return;
   }
 
@@ -121,6 +167,7 @@ form.addEventListener("submit", async (e) => {
   }
 
   try {
+    // Deduct credits
     const userRef = doc(db, "users", currentUser.uid);
     await updateDoc(userRef, {
       credits: (currentCredits - cost)
@@ -128,6 +175,7 @@ form.addEventListener("submit", async (e) => {
     currentCredits -= cost;
     userCreditsEl.textContent = `Credits: ${currentCredits}`;
 
+    // Add promotion
     await addDoc(collection(db, "promotedLinks"), {
       owner: currentUser.uid,
       type: currentType,
@@ -146,6 +194,9 @@ form.addEventListener("submit", async (e) => {
   }
 });
 
+/* --------------------------------------------------
+   LOAD PROMOTIONS
+-------------------------------------------------- */
 async function loadPromotions() {
   activeList.innerHTML = "";
   depletedList.innerHTML = "";
@@ -173,6 +224,9 @@ async function loadPromotions() {
   depleted.forEach(item => renderPromoRow(item, depletedList));
 }
 
+/* --------------------------------------------------
+   RENDER PROMO ROW
+-------------------------------------------------- */
 function renderPromoRow(item, container) {
   const row = document.createElement("div");
   row.className = "promo-row";
@@ -238,6 +292,9 @@ function renderPromoRow(item, container) {
   container.appendChild(row);
 }
 
+/* --------------------------------------------------
+   UPDATE ACTIVE
+-------------------------------------------------- */
 async function updateActive(id, value) {
   try {
     await updateDoc(doc(db, "promotedLinks", id), { active: value });
@@ -247,10 +304,12 @@ async function updateActive(id, value) {
   }
 }
 
+/* --------------------------------------------------
+   DELETE PROMO
+-------------------------------------------------- */
 async function deletePromo(id) {
   try {
     await updateDoc(doc(db, "promotedLinks", id), { active: false, credits: 0 });
-    // or use deleteDoc if you want hard delete
     await loadPromotions();
   } catch (err) {
     console.error(err);
