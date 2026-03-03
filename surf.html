@@ -1,65 +1,76 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Play4Traffic — Surf</title>
-  <link rel="stylesheet" href="global.css">
+  <title>Surf & Earn</title>
+  <link rel="stylesheet" href="global.css" />
 </head>
 
-<body class="home-glass-bg">
+<body class="surf-pirate-bg">
 
-<nav class="top-nav">
-  <a href="index.html" class="nav-item">Home</a>
-  <a href="surf.html" class="nav-item active">Surf</a>
-  <a href="dashboard.html" class="nav-item">Dashboard</a>
-  <a href="admin.html" class="nav-item">Admin</a>
-  <a href="#" id="logoutBtn" class="nav-item nav-danger">Logout</a>
-</nav>
+  <!-- Top Navigation -->
+  <nav class="top-menu" style="
+      width:100%;
+      padding:15px 0;
+      text-align:center;
+      backdrop-filter: blur(10px);
+      background: rgba(0,0,0,0.35);
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+      margin-bottom: 25px;
+    ">
+    <a href="/" class="btn" style="margin:0 8px;">Home</a>
+    <a href="/surf" class="btn" style="margin:0 8px;">Surf</a>
+    <a href="/promote" class="btn" style="margin:0 8px;">Promote Your Link</a>
+    <a href="/dashboard" class="btn" style="margin:0 8px;">Dashboard</a>
+    <a href="/logout" class="btn" style="margin:0 8px;">Logout</a>
+  </nav>
 
-<header>Surf Websites — Earn Credits</header>
+  <div class="container">
 
-<div class="container surf-layout">
+    <h1>Surf & Earn</h1>
 
-  <!-- LEFT PANEL -->
-  <div class="surf-left">
-    <h2>Surf & Earn</h2>
+    <!-- Current URL -->
+    <p>Current URL:</p>
+    <div id="currentUrl" class="url-box">Press Start</div>
 
-    <p>Surfing: <span id="currentUrl">None</span></p>
+    <!-- Timer + Earned -->
+    <p>Time Left: <span id="timeLeft">0</span> seconds</p>
+    <p>Credits Earned: <span id="earnedCredits">0</span></p>
 
-    <button id="startSurfingBtn" class="primary-btn">Start Surfing</button>
-    <button id="nextBtn" class="primary-btn">Next Site</button>
+    <!-- Surf Buttons -->
+    <button id="startSurfBtn" class="btn">Start Surfing</button>
+    <button id="nextSiteBtn" class="btn" style="display:none;">Next Site</button>
 
-    <p>Time Left: <span id="timer">0s</span></p>
-    <p>Earned: <span id="earnedCredits">0</span> credits</p>
+    <!-- Buy Credits Section -->
+    <h2 style="margin-top:40px;">Buy Credits</h2>
 
-    <div class="surf-frame-box">
-      <iframe id="surfFrame" src="about:blank"></iframe>
+    <button id="buy100" class="btn">Buy 100 Credits – $1</button>
+    <button id="buy220" class="btn">Buy 220 Credits – $2</button>
+    <button id="buy600" class="btn">Buy 600 Credits – $5</button>
+    <button id="buy1300" class="btn">Buy 1300 Credits – $10</button>
+    <button id="buy2800" class="btn">Buy 2800 Credits – $20</button>
+
+    <button id="buyCreditsBtnTop" class="btn" style="margin-top:20px;">
+      Buy Credits
+    </button>
+
+    <!-- Play to Earn -->
+    <div style="text-align:center; margin-top:40px;">
+      <a 
+        href="/game.html" 
+        class="btn" 
+        style="padding:14px 28px; font-size:20px;"
+      >
+        Play to Earn
+      </a>
     </div>
+
   </div>
 
-  <!-- RIGHT PANEL -->
-  <div class="surf-right">
-    <h2>Buy Credits</h2>
-
-    <button class="buy-btn" onclick="buyCredits(100, 1)">Buy 100 Credits — $1</button>
-    <button class="buy-btn" onclick="buyCredits(220, 3)">Buy 220 Credits — $3</button>
-    <button class="buy-btn" onclick="buyCredits(600, 5)">Buy 600 Credits — $5</button>
-    <button class="buy-btn" onclick="buyCredits(1300, 10)">Buy 1300 Credits — $10</button>
-    <button class="buy-btn" onclick="buyCredits(2800, 20)">Buy 2800 Credits — $20</button>
-
-    <h3>Your Credits: <span id="creditsDisplay">0</span></h3>
-  </div>
-
-</div>
-
-<script>
-function buyCredits(amount, price) {
-  alert("Stripe purchase flow goes here.");
-}
-</script>
-
-<script type="module" src="surf.js"></script>
+  <!-- Surf Engine -->
+  <script type="module" src="surf.js"></script>
 
 </body>
 </html>
