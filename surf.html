@@ -10,34 +10,54 @@
 <body class="home-glass-bg">
 
 <nav class="top-nav">
-  <a href="dashboard.html" class="nav-item">Dashboard</a>
-  <a href="promote.html" class="nav-item">Promote</a>
   <a href="index.html" class="nav-item">Home</a>
+  <a href="surf.html" class="nav-item active">Surf</a>
+  <a href="dashboard.html" class="nav-item">Dashboard</a>
+  <a href="admin.html" class="nav-item">Admin</a>
   <a href="#" id="logoutBtn" class="nav-item nav-danger">Logout</a>
 </nav>
 
-<header>Surf & Earn Credits</header>
+<header>Surf Websites — Earn Credits</header>
 
-<div class="container">
+<div class="container surf-layout">
 
-  <div class="hero">
-    <h1>Surf Websites</h1>
-    <p>Earn credits by viewing other users' promoted links.</p>
-    <p>Your Credits: <span id="creditsDisplay">0</span></p>
+  <!-- LEFT PANEL -->
+  <div class="surf-left">
+    <h2>Surf & Earn</h2>
+
+    <p>Surfing: <span id="currentUrl">None</span></p>
+
+    <button id="startSurfingBtn" class="primary-btn">Start Surfing</button>
+    <button id="nextBtn" class="primary-btn">Next Site</button>
+
+    <p>Time Left: <span id="timer">0s</span></p>
+    <p>Earned: <span id="earnedCredits">0</span> credits</p>
+
+    <div class="surf-frame-box">
+      <iframe id="surfFrame" src="about:blank"></iframe>
+    </div>
   </div>
 
-  <button id="startSurfingBtn" class="primary-btn">Start Surfing</button>
+  <!-- RIGHT PANEL -->
+  <div class="surf-right">
+    <h2>Buy Credits</h2>
 
-  <div class="surf-box">
-    <iframe id="surfFrame" src="about:blank"></iframe>
-  </div>
+    <button class="buy-btn" onclick="buyCredits(100, 1)">Buy 100 Credits — $1</button>
+    <button class="buy-btn" onclick="buyCredits(220, 3)">Buy 220 Credits — $3</button>
+    <button class="buy-btn" onclick="buyCredits(600, 5)">Buy 600 Credits — $5</button>
+    <button class="buy-btn" onclick="buyCredits(1300, 10)">Buy 1300 Credits — $10</button>
+    <button class="buy-btn" onclick="buyCredits(2800, 20)">Buy 2800 Credits — $20</button>
 
-  <div class="surf-controls">
-    <span id="timer"></span>
-    <button id="nextBtn" class="primary-btn">Next</button>
+    <h3>Your Credits: <span id="creditsDisplay">0</span></h3>
   </div>
 
 </div>
+
+<script>
+function buyCredits(amount, price) {
+  alert("Stripe purchase flow goes here.");
+}
+</script>
 
 <script type="module" src="surf.js"></script>
 

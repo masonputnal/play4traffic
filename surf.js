@@ -40,6 +40,8 @@ const startBtn = document.getElementById("startSurfingBtn");
 const nextBtn = document.getElementById("nextBtn");
 const timerEl = document.getElementById("timer");
 const creditsEl = document.getElementById("creditsDisplay");
+const earnedEl = document.getElementById("earnedCredits");
+const currentUrlEl = document.getElementById("currentUrl");
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
@@ -83,16 +85,17 @@ async function startSurfSession() {
 
 async function loadNextLink() {
   clearInterval(surfTimer);
-  timerEl.textContent = "";
+  timerEl.textContent = "0s";
 
   const link = await getRandomActivePromotion();
   if (!link) {
     iframe.src = "about:blank";
-    timerEl.textContent = "No active promotions available.";
+    currentUrlEl.textContent = "No active promotions available.";
     return;
   }
 
   currentLink = link;
+  currentUrlEl.textContent = link.url;
   iframe.src = link.url;
 
   startCountdown(link.duration, async () => {
@@ -134,6 +137,7 @@ function startCountdown(seconds, onComplete) {
     if (remaining <= 0) {
       clearInterval(surfTimer);
       onComplete();
+      earnedEl.textContent = parseInt(earnedEl.textContent) + 1;
     }
   }, 1000);
 }
