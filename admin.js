@@ -60,6 +60,9 @@ onAuthStateChanged(auth, async (user) => {
   loadRoblox();
   loadUsers();
   loadReports();
+
+  // Auto-open Sites tab
+  document.getElementById("panelSites").style.display = "block";
 });
 
 /* --------------------------------------------------
@@ -91,8 +94,6 @@ Object.keys(tabs).forEach(tabId => {
 -------------------------------------------------- */
 async function loadSites() {
   const list = document.getElementById("sitesList");
-  if (!list) return;
-
   list.innerHTML = "";
 
   const snap = await getDocs(collection(db, "sites"));
@@ -102,7 +103,7 @@ async function loadSites() {
 
     li.innerHTML = `
       <strong>${data.url}</strong><br>
-      Owner: ${data.ownerUid || "Unknown"}<br>
+      Owner: ${data.ownerUid}<br>
       <button data-id="${docSnap.id}" class="deleteSite">Delete</button>
     `;
 
@@ -120,31 +121,24 @@ async function loadSites() {
 /* --------------------------------------------------
    ADD SITE
 -------------------------------------------------- */
-const addSiteForm = document.getElementById("addSiteForm");
-if (addSiteForm) {
-  addSiteForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
+document.getElementById("addSiteForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    const url = document.getElementById("newSiteUrl").value.trim();
-    const ownerUid = document.getElementById("newSiteOwner").value.trim();
+  const url = document.getElementById("newSiteUrl").value.trim();
+  const ownerUid = document.getElementById("newSiteOwner").value.trim();
 
-    if (!url || !ownerUid) return;
+  const id = crypto.randomUUID();
+  await setDoc(doc(db, "sites", id), { url, ownerUid });
 
-    const id = crypto.randomUUID();
-    await setDoc(doc(db, "sites", id), { url, ownerUid });
-
-    addSiteForm.reset();
-    loadSites();
-  });
-}
+  e.target.reset();
+  loadSites();
+});
 
 /* --------------------------------------------------
    LOAD VIDEOS
 -------------------------------------------------- */
 async function loadVideos() {
   const list = document.getElementById("videosList");
-  if (!list) return;
-
   list.innerHTML = "";
 
   const snap = await getDocs(collection(db, "videos"));
@@ -154,7 +148,7 @@ async function loadVideos() {
 
     li.innerHTML = `
       <strong>${data.url}</strong><br>
-      Owner: ${data.ownerUid || "Unknown"}<br>
+      Owner: ${data.ownerUid}<br>
       <button data-id="${docSnap.id}" class="deleteVideo">Delete</button>
     `;
 
@@ -172,31 +166,24 @@ async function loadVideos() {
 /* --------------------------------------------------
    ADD VIDEO
 -------------------------------------------------- */
-const addVideoForm = document.getElementById("addVideoForm");
-if (addVideoForm) {
-  addVideoForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
+document.getElementById("addVideoForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    const url = document.getElementById("newVideoUrl").value.trim();
-    const ownerUid = document.getElementById("newVideoOwner").value.trim();
+  const url = document.getElementById("newVideoUrl").value.trim();
+  const ownerUid = document.getElementById("newVideoOwner").value.trim();
 
-    if (!url || !ownerUid) return;
+  const id = crypto.randomUUID();
+  await setDoc(doc(db, "videos", id), { url, ownerUid });
 
-    const id = crypto.randomUUID();
-    await setDoc(doc(db, "videos", id), { url, ownerUid });
-
-    addVideoForm.reset();
-    loadVideos();
-  });
-}
+  e.target.reset();
+  loadVideos();
+});
 
 /* --------------------------------------------------
    LOAD ROBLOX
 -------------------------------------------------- */
 async function loadRoblox() {
   const list = document.getElementById("robloxList");
-  if (!list) return;
-
   list.innerHTML = "";
 
   const snap = await getDocs(collection(db, "games"));
@@ -206,7 +193,7 @@ async function loadRoblox() {
 
     li.innerHTML = `
       <strong>${data.url}</strong><br>
-      Owner: ${data.ownerUid || "Unknown"}<br>
+      Owner: ${data.ownerUid}<br>
       <button data-id="${docSnap.id}" class="deleteRoblox">Delete</button>
     `;
 
@@ -224,31 +211,24 @@ async function loadRoblox() {
 /* --------------------------------------------------
    ADD ROBLOX GAME
 -------------------------------------------------- */
-const addRobloxForm = document.getElementById("addRobloxForm");
-if (addRobloxForm) {
-  addRobloxForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
+document.getElementById("addRobloxForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    const url = document.getElementById("newRobloxUrl").value.trim();
-    const ownerUid = document.getElementById("newRobloxOwner").value.trim();
+  const url = document.getElementById("newRobloxUrl").value.trim();
+  const ownerUid = document.getElementById("newRobloxOwner").value.trim();
 
-    if (!url || !ownerUid) return;
+  const id = crypto.randomUUID();
+  await setDoc(doc(db, "games", id), { url, ownerUid });
 
-    const id = crypto.randomUUID();
-    await setDoc(doc(db, "games", id), { url, ownerUid });
-
-    addRobloxForm.reset();
-    loadRoblox();
-  });
-}
+  e.target.reset();
+  loadRoblox();
+});
 
 /* --------------------------------------------------
-   LOAD USERS + GIVE CREDITS
+   LOAD USERS
 -------------------------------------------------- */
 async function loadUsers() {
   const list = document.getElementById("usersList");
-  if (!list) return;
-
   list.innerHTML = "";
 
   const snap = await getDocs(collection(db, "users"));
@@ -260,31 +240,27 @@ async function loadUsers() {
   });
 }
 
-const giveCreditsForm = document.getElementById("giveCreditsForm");
-if (giveCreditsForm) {
-  giveCreditsForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
+/* --------------------------------------------------
+   GIVE CREDITS
+-------------------------------------------------- */
+document.getElementById("giveCreditsForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    const uid = document.getElementById("creditUserUid").value.trim();
-    const amount = parseInt(document.getElementById("creditAmount").value.trim());
+  const uid = document.getElementById("creditUserUid").value.trim();
+  const amount = parseInt(document.getElementById("creditAmount").value.trim());
 
-    if (!uid || isNaN(amount)) return;
+  const userRef = doc(db, "users", uid);
+  await updateDoc(userRef, { credits: amount });
 
-    const userRef = doc(db, "users", uid);
-    await updateDoc(userRef, { credits: amount });
-
-    giveCreditsForm.reset();
-    loadUsers();
-  });
-}
+  e.target.reset();
+  loadUsers();
+});
 
 /* --------------------------------------------------
-   LOAD REPORTS + DELETE
+   LOAD REPORTS
 -------------------------------------------------- */
 async function loadReports() {
   const list = document.getElementById("reportsList");
-  if (!list) return;
-
   list.innerHTML = "";
 
   const snap = await getDocs(collection(db, "reports"));

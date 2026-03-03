@@ -35,30 +35,63 @@
     <button class="admin-tab" id="tabReports">Reports</button>
   </div>
 
-  <!-- PANELS -->
+  <!-- SITES PANEL -->
   <div class="admin-panel" id="panelSites" style="display:none;">
     <h2>Manage Sites</h2>
-    <p>Coming soon…</p>
+
+    <form id="addSiteForm" class="admin-form">
+      <input id="newSiteUrl" type="text" placeholder="Website URL" required>
+      <input id="newSiteOwner" type="text" placeholder="Owner UID" required>
+      <button type="submit">Add Website</button>
+    </form>
+
+    <ul id="sitesList" class="admin-list"></ul>
   </div>
 
+  <!-- VIDEOS PANEL -->
   <div class="admin-panel" id="panelVideos" style="display:none;">
     <h2>Manage Videos</h2>
-    <p>Coming soon…</p>
+
+    <form id="addVideoForm" class="admin-form">
+      <input id="newVideoUrl" type="text" placeholder="YouTube URL" required>
+      <input id="newVideoOwner" type="text" placeholder="Owner UID" required>
+      <button type="submit">Add Video</button>
+    </form>
+
+    <ul id="videosList" class="admin-list"></ul>
   </div>
 
+  <!-- ROBLOX PANEL -->
   <div class="admin-panel" id="panelRoblox" style="display:none;">
     <h2>Manage Roblox Games</h2>
-    <p>Coming soon…</p>
+
+    <form id="addRobloxForm" class="admin-form">
+      <input id="newRobloxUrl" type="text" placeholder="Roblox Game URL" required>
+      <input id="newRobloxOwner" type="text" placeholder="Owner UID" required>
+      <button type="submit">Add Roblox Game</button>
+    </form>
+
+    <ul id="robloxList" class="admin-list"></ul>
   </div>
 
+  <!-- USERS PANEL -->
   <div class="admin-panel" id="panelUsers" style="display:none;">
     <h2>Manage Users</h2>
-    <p>Coming soon…</p>
+
+    <ul id="usersList" class="admin-list"></ul>
+
+    <h3>Give User Credits</h3>
+    <form id="giveCreditsForm" class="admin-form">
+      <input id="creditUserUid" type="text" placeholder="User UID" required>
+      <input id="creditAmount" type="number" placeholder="Amount (e.g., 9999999)" required>
+      <button type="submit">Add Credits</button>
+    </form>
   </div>
 
+  <!-- REPORTS PANEL -->
   <div class="admin-panel" id="panelReports" style="display:none;">
-    <h2>Reports & Abuse</h2>
-    <p>Coming soon…</p>
+    <h2>Reported Links</h2>
+    <ul id="reportsList" class="admin-list"></ul>
   </div>
 
 </div>
