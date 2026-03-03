@@ -10,7 +10,8 @@ import {
   getDoc,
   setDoc,
   deleteDoc,
-  updateDoc
+  updateDoc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 import {
@@ -54,14 +55,12 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  // Load all admin data
   loadSites();
   loadVideos();
   loadRoblox();
   loadUsers();
   loadReports();
 
-  // Auto-open Sites tab
   document.getElementById("panelSites").style.display = "block";
 });
 
@@ -104,6 +103,8 @@ async function loadSites() {
     li.innerHTML = `
       <strong>${data.url}</strong><br>
       Owner: ${data.ownerUid}<br>
+      Credits: ${data.creditsRemaining}<br>
+      Active: ${data.active}<br>
       <button data-id="${docSnap.id}" class="deleteSite">Delete</button>
     `;
 
@@ -126,9 +127,19 @@ document.getElementById("addSiteForm").addEventListener("submit", async (e) => {
 
   const url = document.getElementById("newSiteUrl").value.trim();
   const ownerUid = document.getElementById("newSiteOwner").value.trim();
+  const credits = parseInt(document.getElementById("newSiteCredits").value.trim());
 
   const id = crypto.randomUUID();
-  await setDoc(doc(db, "sites", id), { url, ownerUid });
+  await setDoc(doc(db, "sites", id), {
+    url,
+    ownerUid,
+    type: "site",
+    duration: 10,
+    creditsAssigned: credits,
+    creditsRemaining: credits,
+    active: true,
+    addedAt: serverTimestamp()
+  });
 
   e.target.reset();
   loadSites();
@@ -149,6 +160,8 @@ async function loadVideos() {
     li.innerHTML = `
       <strong>${data.url}</strong><br>
       Owner: ${data.ownerUid}<br>
+      Credits: ${data.creditsRemaining}<br>
+      Active: ${data.active}<br>
       <button data-id="${docSnap.id}" class="deleteVideo">Delete</button>
     `;
 
@@ -171,9 +184,19 @@ document.getElementById("addVideoForm").addEventListener("submit", async (e) => 
 
   const url = document.getElementById("newVideoUrl").value.trim();
   const ownerUid = document.getElementById("newVideoOwner").value.trim();
+  const credits = parseInt(document.getElementById("newVideoCredits").value.trim());
 
   const id = crypto.randomUUID();
-  await setDoc(doc(db, "videos", id), { url, ownerUid });
+  await setDoc(doc(db, "videos", id), {
+    url,
+    ownerUid,
+    type: "video",
+    duration: 15,
+    creditsAssigned: credits,
+    creditsRemaining: credits,
+    active: true,
+    addedAt: serverTimestamp()
+  });
 
   e.target.reset();
   loadVideos();
@@ -194,6 +217,8 @@ async function loadRoblox() {
     li.innerHTML = `
       <strong>${data.url}</strong><br>
       Owner: ${data.ownerUid}<br>
+      Credits: ${data.creditsRemaining}<br>
+      Active: ${data.active}<br>
       <button data-id="${docSnap.id}" class="deleteRoblox">Delete</button>
     `;
 
@@ -216,9 +241,19 @@ document.getElementById("addRobloxForm").addEventListener("submit", async (e) =>
 
   const url = document.getElementById("newRobloxUrl").value.trim();
   const ownerUid = document.getElementById("newRobloxOwner").value.trim();
+  const credits = parseInt(document.getElementById("newRobloxCredits").value.trim());
 
   const id = crypto.randomUUID();
-  await setDoc(doc(db, "games", id), { url, ownerUid });
+  await setDoc(doc(db, "games", id), {
+    url,
+    ownerUid,
+    type: "roblox",
+    duration: 20,
+    creditsAssigned: credits,
+    creditsRemaining: credits,
+    active: true,
+    addedAt: serverTimestamp()
+  });
 
   e.target.reset();
   loadRoblox();
