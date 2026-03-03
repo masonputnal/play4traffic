@@ -1,4 +1,4 @@
-// surf.js — Firestore-driven surf engine with anti-spam, anti-multi-tab, and session locking
+// surf.js — Firestore-driven surf engine with popup surfing, anti-spam, anti-multi-tab, and session locking
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import {
@@ -70,8 +70,15 @@ let timeLeft = 0;
 let currentSessionDocRef = null;
 let activeSessionUnsub = null;
 
-let PROMOTIONS = [];   // <-- NEW: unified list of sites/videos/games
+let PROMOTIONS = [];
 let promoIndex = -1;
+
+// Popup window state
+let surfPopup = null;
+let popupWidth = Math.floor(window.screen.width / 2);
+let popupHeight = window.screen.height;
+let popupLeft = window.screen.width - popupWidth;
+let popupTop = 0;
 
 // -------------------------
 // UI HELPERS
@@ -95,7 +102,7 @@ function setSurfingState(active) {
 }
 
 // -------------------------
-// LOAD PROMOTIONS (NEW)
+// LOAD PROMOTIONS
 // -------------------------
 async function loadPromotions() {
   PROMOTIONS = [];
@@ -205,6 +212,11 @@ function watchActiveSessionForUser(userId) {
     if (!snap.empty) {
       setSurfingState(true);
       currentSessionDocRef = snap.docs[0].ref;
+
+      // Auto-reopen popup on session start
+      const promo = PROMOTIONS[promoIndex];
+      if (promo) openPromotion(promo.url);
+
     } else {
       setSurfingState(false);
       currentSessionDocRef = null;
@@ -213,17 +225,74 @@ function watchActiveSessionForUser(userId) {
 }
 
 // -------------------------
-// SURF FLOW (NEW)
+// POPUP RESIZE TRACKING
+// -------------------------
+function trackPopupResize() {
+  if (!surfPopup) return;
+
+  const checkInterval = setInterval(() => {
+    if (!surfPopup || surfPopup.closed) {
+      clearInterval(checkInterval);
+      return;
+    }
+
+    try {
+      popupWidth = surfPopup.outerWidth;
+      popupHeight = surfPopup.outerHeight;
+      popupLeft = surfPopup.screenX;
+      popupTop = surfPopup.screenY;
+    } catch (e) {}
+  }, 500);
+}
+
+// -------------------------
+// POPUP OPENING
+// -------------------------
+function openPromotion(url) {
+  currentUrlEl.textContent = url;
+
+  let blocked = false;
+
+  // Reuse existing popup
+  if (surfPopup && !surfPopup.closed) {
+    try {
+      surfPopup.location.href = url;
+      surfPopup.focus();
+    } catch (e) {
+      blocked = true;
+    }
+    return;
+  }
+
+  // Open new popup
+  surfPopup = window.open(
+    url,
+    "surfWindow",
+    `width=${popupWidth},height=${popupHeight},left=${popupLeft},top=${popupTop},resizable=yes`
+  );
+
+  // Popup blocked fallback
+  if (!surfPopup || surfPopup.closed || typeof surfPopup.closed === "undefined") {
+    blocked = true;
+  }
+
+  if (blocked) {
+    alert("Your browser blocked the popup. Please allow popups for this site.");
+    window.open(url, "_blank");
+    return;
+  }
+
+  surfPopup.focus();
+  trackPopupResize();
+}
+
+// -------------------------
+// SURF FLOW
 // -------------------------
 function getNextPromotion() {
   if (PROMOTIONS.length === 0) return null;
   promoIndex = (promoIndex + 1) % PROMOTIONS.length;
   return PROMOTIONS[promoIndex];
-}
-
-function openPromotion(url) {
-  currentUrlEl.textContent = url;
-  window.open(url, "_blank", "noopener");
 }
 
 async function startSurfingFlow() {
@@ -256,6 +325,11 @@ async function startSurfingFlow() {
         clearInterval(surfTimer);
         surfTimer = null;
 
+        // Auto-close popup
+        if (surfPopup && !surfPopup.closed) {
+          try { surfPopup.close(); } catch (e) {}
+        }
+
         await deductPromotionCredit(promo);
         await completeSurfSession();
 
@@ -271,7 +345,7 @@ async function startSurfingFlow() {
 }
 
 // -------------------------
-// DEDUCT PROMOTION CREDIT (NEW)
+// DEDUCT PROMOTION CREDIT
 // -------------------------
 async function deductPromotionCredit(promo) {
   const ref = doc(db, promo.col, promo.id);
@@ -288,7 +362,7 @@ async function deductPromotionCredit(promo) {
 }
 
 // -------------------------
-// STRIPE CHECKOUT (unchanged)
+// STRIPE CHECKOUT
 // -------------------------
 async function createCheckout(priceId) {
   if (!uid) return alert("You must be logged in.");
@@ -312,10 +386,17 @@ startSurfBtn.addEventListener("click", () => {
 
 nextSiteBtn.addEventListener("click", () => {
   const promo = getNextPromotion();
-  if (promo) openPromotion(promo.url);
+  if (!promo) return;
+
+  if (!surfPopup || surfPopup.closed) {
+    openPromotion(promo.url);
+  } else {
+    surfPopup.location.href = promo.url;
+    surfPopup.focus();
+  }
 });
 
-// Stripe buttons (unchanged)
+// Stripe buttons
 if (buy100Btn) buy100Btn.onclick = () => createCheckout("price_1T4YZPQeHhafnMhGqcJZsjs8");
 if (buy220Btn) buy220Btn.onclick = () => createCheckout("price_1T4YlNQeHhafnMhGuZxTm8SO");
 if (buy600Btn) buy600Btn.onclick = () => createCheckout("price_1T4YzvQeHhafnMhGp9yzzM4O");
