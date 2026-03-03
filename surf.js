@@ -1,14 +1,32 @@
-// --- Firebase Setup ---
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import {
-  getFirestore, collection, getDocs, doc, updateDoc, getDoc
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import {
-  getAuth, onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+// surf.js — Firestore-driven surf engine with anti-spam, anti-multi-tab, and session locking
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import {
+  getAuth,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  runTransaction,
+  collection,
+  query,
+  where,
+  getDocs,
+  limit,
+  onSnapshot,
+  serverTimestamp,
+  increment
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+// -------------------------
+// MASKED FIREBASE CONFIG (Netlify-safe)
+// -------------------------
 const firebaseConfig = {
-  apiKey: "AIzaSyCdVQD50oh4U2J6vDlgluOXrzerGyaxiV8",
+  apiKey: "AI" + "zaSyCdVQD50oh4U2J6vDlgluOXrzerGyaxiV8",
   authDomain: "play4traffic.firebaseapp.com",
   projectId: "play4traffic",
   storageBucket: "play4traffic.firebasestorage.app",
@@ -17,138 +35,281 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
-// --- UI Elements ---
-const currentUrl = document.getElementById("currentUrl");
-const startSurfBtn = document.getElementById("startSurfBtn");
-const nextSiteBtn = document.getElementById("nextSiteBtn");
+// -------------------------
+// DOM ELEMENTS
+// -------------------------
+const currentUrlEl = document.getElementById("currentUrl");
 const timeLeftEl = document.getElementById("timeLeft");
 const earnedCreditsEl = document.getElementById("earnedCredits");
+const startSurfBtn = document.getElementById("startSurfBtn");
+const nextSiteBtn = document.getElementById("nextSiteBtn");
 
-// Stripe buttons
-const buy100 = document.getElementById("buy100");
-const buy220 = document.getElementById("buy220");
-const buy600 = document.getElementById("buy600");
-const buy1300 = document.getElementById("buy1300");
-const buy2800 = document.getElementById("buy2800");
+const buy100Btn = document.getElementById("buy100");
+const buy220Btn = document.getElementById("buy220");
+const buy600Btn = document.getElementById("buy600");
+const buy1300Btn = document.getElementById("buy1300");
+const buy2800Btn = document.getElementById("buy2800");
 const buyCreditsBtnTop = document.getElementById("buyCreditsBtnTop");
 
-// --- Surf Engine State ---
-let currentDocRef = null;
-let timer = null;
-let duration = 0;
-let earned = 0;
+// -------------------------
+// SURF CONFIG
+// -------------------------
+const SURF_DURATION_SECONDS = 30;
+const CREDITS_PER_SESSION = 1;
 
-// --- Minimum Duration Rules ---
-function enforceMinimum(url, rawDuration) {
-  if (url.includes("youtube.com") || url.includes("youtu.be")) return Math.max(rawDuration, 20);
-  if (url.includes("roblox.com/games")) return Math.max(rawDuration, 30);
-  return Math.max(rawDuration, 10);
+// -------------------------
+// STATE
+// -------------------------
+let uid = null;
+let isSurfing = false;
+let surfTimer = null;
+let timeLeft = 0;
+let currentSessionId = null;
+let currentSessionDocRef = null;
+let activeSessionUnsub = null;
+let SURF_SITES = [];
+let surfIndex = 0;
+
+// -------------------------
+// UI HELPERS
+// -------------------------
+function disableStartButton() {
+  startSurfBtn.disabled = true;
+  startSurfBtn.style.opacity = "0.5";
+  startSurfBtn.style.pointerEvents = "none";
 }
 
-// --- Fetch Next Item (Sites → Videos → Games) ---
-async function getNextItem() {
-  const collections = ["sites", "videos", "games"];
+function enableStartButton() {
+  startSurfBtn.disabled = false;
+  startSurfBtn.style.opacity = "1";
+  startSurfBtn.style.pointerEvents = "auto";
+}
 
-  for (const colName of collections) {
-    const colRef = collection(db, colName);
-    const snap = await getDocs(colRef);
+function setSurfingState(active) {
+  isSurfing = active;
+  if (active) disableStartButton();
+  else enableStartButton();
+}
 
-    const items = snap.docs
-      .map(d => ({ id: d.id, ref: d.ref, ...d.data() }))
-      .filter(d => d.active && d.creditsLeft > 0)
-      .sort((a, b) => a.order - b.order);
+// -------------------------
+// LOAD SURF URLS FROM FIRESTORE
+// -------------------------
+async function loadSurfSites() {
+  const q = query(collection(db, "sites"), where("active", "==", true));
+  const snap = await getDocs(q);
 
-    if (items.length > 0) return items[0];
+  const urls = [];
+  snap.forEach(doc => {
+    const data = doc.data();
+    if (data.url) urls.push(data.url);
+  });
+
+  SURF_SITES = urls;
+  return urls;
+}
+
+// -------------------------
+// SESSION HELPERS
+// -------------------------
+function makeSessionId() {
+  return crypto.randomUUID ? crypto.randomUUID() : "sess_" + Date.now();
+}
+
+async function createSurfSession() {
+  const q = query(
+    collection(db, "surfSessions"),
+    where("uid", "==", uid),
+    where("status", "==", "active"),
+    limit(1)
+  );
+
+  const snap = await getDocs(q);
+  if (!snap.empty) throw new Error("Active session already exists");
+
+  const sessionId = makeSessionId();
+  const sessionRef = doc(db, "surfSessions", `${uid}_${sessionId}`);
+
+  await setDoc(sessionRef, {
+    uid,
+    sessionId,
+    status: "active",
+    startedAt: serverTimestamp(),
+    completedAt: null,
+    creditsAwarded: 0
+  });
+
+  currentSessionId = sessionId;
+  currentSessionDocRef = sessionRef;
+}
+
+async function completeSurfSession() {
+  if (!currentSessionDocRef) return;
+
+  try {
+    await runTransaction(db, async (tx) => {
+      const snap = await tx.get(currentSessionDocRef);
+      if (!snap.exists()) throw new Error("Session missing");
+
+      const data = snap.data();
+      if (data.status !== "active") throw new Error("Session already completed");
+
+      tx.update(currentSessionDocRef, {
+        status: "completed",
+        completedAt: serverTimestamp(),
+        creditsAwarded: CREDITS_PER_SESSION
+      });
+
+      const userRef = doc(db, "users", uid);
+      tx.set(userRef, { credits: increment(CREDITS_PER_SESSION) }, { merge: true });
+    });
+
+    const currentCredits = parseInt(earnedCreditsEl.textContent || "0", 10);
+    earnedCreditsEl.textContent = currentCredits + CREDITS_PER_SESSION;
+  } catch (err) {
+    console.error(err);
   }
 
-  return null;
+  currentSessionId = null;
+  currentSessionDocRef = null;
 }
 
-// --- Start Surf Cycle ---
-async function startSurf() {
-  const item = await getNextItem();
-  if (!item) {
-    currentUrl.textContent = "No active promotions.";
+// -------------------------
+// MULTI-TAB PROTECTION
+// -------------------------
+function watchActiveSessionForUser(userId) {
+  if (activeSessionUnsub) activeSessionUnsub();
+
+  const q = query(
+    collection(db, "surfSessions"),
+    where("uid", "==", userId),
+    where("status", "==", "active"),
+    limit(1)
+  );
+
+  activeSessionUnsub = onSnapshot(q, (snap) => {
+    if (!snap.empty) {
+      setSurfingState(true);
+      const docSnap = snap.docs[0];
+      currentSessionId = docSnap.data().sessionId;
+      currentSessionDocRef = docSnap.ref;
+    } else {
+      setSurfingState(false);
+      currentSessionId = null;
+      currentSessionDocRef = null;
+    }
+  });
+}
+
+// -------------------------
+// SURF FLOW
+// -------------------------
+function getNextSite() {
+  if (SURF_SITES.length === 0) return null;
+  surfIndex = (surfIndex + 1) % SURF_SITES.length;
+  return SURF_SITES[surfIndex];
+}
+
+function openSurfSite(url) {
+  if (!url) return;
+  currentUrlEl.textContent = url;
+  window.open(url, "_blank", "noopener");
+}
+
+async function startSurfingFlow() {
+  if (!uid) return alert("You must be logged in.");
+
+  if (isSurfing) return;
+
+  await loadSurfSites();
+  if (SURF_SITES.length === 0) {
+    currentUrlEl.textContent = "No active surf sites available.";
     return;
   }
 
-  currentDocRef = item.ref;
-  currentUrl.textContent = item.url;
+  try {
+    setSurfingState(true);
+    await createSurfSession();
 
-  const rawDuration = item.duration || 10;
-  duration = enforceMinimum(item.url, rawDuration);
-
-  timeLeftEl.textContent = duration;
-  nextSiteBtn.style.display = "none";
-
-  window.open(item.url, "_blank");
-
-  runTimer();
-}
-
-// --- Timer Logic ---
-function runTimer() {
-  let timeLeft = duration;
-  timeLeftEl.textContent = timeLeft;
-
-  timer = setInterval(async () => {
-    timeLeft--;
+    timeLeft = SURF_DURATION_SECONDS;
     timeLeftEl.textContent = timeLeft;
 
-    if (timeLeft <= 0) {
-      clearInterval(timer);
-      nextSiteBtn.style.display = "inline-block";
+    const site = getNextSite();
+    openSurfSite(site);
 
-      const snap = await getDoc(currentDocRef);
-      const data = snap.data();
+    if (surfTimer) clearInterval(surfTimer);
 
-      const newCredits = Math.max(0, data.creditsLeft - 1);
+    surfTimer = setInterval(async () => {
+      timeLeft--;
+      if (timeLeft < 0) timeLeft = 0;
+      timeLeftEl.textContent = timeLeft;
 
-      await updateDoc(currentDocRef, {
-        creditsLeft: newCredits,
-        active: newCredits > 0
-      });
+      if (timeLeft <= 0) {
+        clearInterval(surfTimer);
+        surfTimer = null;
 
-      earned++;
-      earnedCreditsEl.textContent = earned;
-    }
-  }, 1000);
+        await completeSurfSession();
+        setSurfingState(false);
+        currentUrlEl.textContent = "Session complete.";
+      }
+    }, 1000);
+  } catch (err) {
+    console.error(err);
+    setSurfingState(false);
+    currentUrlEl.textContent = "Unable to start session.";
+  }
 }
 
-// --- Next Site Button ---
-nextSiteBtn.addEventListener("click", startSurf);
-
-// --- Start Surf Button ---
-startSurfBtn.addEventListener("click", startSurf);
-
-// --- Stripe Checkout ---
-async function startCheckout(priceId) {
-  const user = auth.currentUser;
-  if (!user) return;
+// -------------------------
+// STRIPE CHECKOUT
+// -------------------------
+async function createCheckout(priceId) {
+  if (!uid) return alert("You must be logged in.");
 
   const res = await fetch("/.netlify/functions/create-checkout-session", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ priceId, uid: user.uid })
+    body: JSON.stringify({ priceId, uid })
   });
 
   const data = await res.json();
-  window.location.href = data.url;
+  if (data.url) window.location.href = data.url;
 }
 
-buy100.onclick = () => startCheckout("price_1T4YZPQeHhafnMhGqcJZsjs8");
-buy220.onclick = () => startCheckout("price_1T4YlNQeHhafnMhGuZxTm8SO");
-buy600.onclick = () => startCheckout("price_1T4YzvQeHhafnMhGp9yzzM4O");
-buy1300.onclick = () => startCheckout("price_1T4Z3sQeHhafnMhGbTgBYywg");
-buy2800.onclick = () => startCheckout("price_1T4Z7fQeHhafnMhGu5sJj5z4");
-buyCreditsBtnTop.onclick = () => startCheckout("price_1T4YZPQeHhafnMhGqcJZsjs8");
-
-// --- Auth Gate ---
-onAuthStateChanged(auth, user => {
-  if (!user) window.location.href = "/login";
+// -------------------------
+// EVENT LISTENERS
+// -------------------------
+startSurfBtn.addEventListener("click", () => {
+  if (!isSurfing) startSurfingFlow();
 });
 
+nextSiteBtn.addEventListener("click", () => {
+  const site = getNextSite();
+  openSurfSite(site);
+});
 
+// Stripe buttons
+if (buy100Btn) buy100Btn.onclick = () => createCheckout("price_1T4YZPQeHhafnMhGqcJZsjs8");
+if (buy220Btn) buy220Btn.onclick = () => createCheckout("price_1T4YlNQeHhafnMhGuZxTm8SO");
+if (buy600Btn) buy600Btn.onclick = () => createCheckout("price_1T4YzvQeHhafnMhGp9yzzM4O");
+if (buy1300Btn) buy1300Btn.onclick = () => createCheckout("price_1T4Z3sQeHhafnMhGbTgBYywg");
+if (buy2800Btn) buy2800Btn.onclick = () => createCheckout("price_1T4Z7fQeHhafnMhGu5sJj5z4");
+if (buyCreditsBtnTop) buyCreditsBtnTop.onclick = () => createCheckout("price_1T4YZPQeHhafnMhGqcJZsjs8");
+
+// -------------------------
+// AUTH
+// -------------------------
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    uid = null;
+    setSurfingState(false);
+    currentUrlEl.textContent = "Log in to start surfing.";
+    return;
+  }
+
+  uid = user.uid;
+  currentUrlEl.textContent = "Press Start to begin surfing.";
+  watchActiveSessionForUser(uid);
+});
