@@ -179,3 +179,10 @@ input:focus, select:focus {
   border-color: var(--accent);
   box-shadow: var(--accent-glow);
 }
+/* Surf page pirate background (isolated from homepage) */
+.surf-pirate-bg {
+  background: url("https://res.cloudinary.com/dz5hkoqmw/image/upload/v1772013254/Untitled_Project_-_illustrationImage_1_sgiyd7.png")
+              no-repeat center center / cover;
+  min-height: 100vh;
+  color: var(--text);
+}
