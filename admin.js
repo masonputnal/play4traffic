@@ -1,5 +1,5 @@
 /* --------------------------------------------------
-   FIREBASE v10 SETUP
+   FIREBASE SETUP
 -------------------------------------------------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import {
@@ -9,7 +9,8 @@ import {
   doc,
   getDoc,
   setDoc,
-  deleteDoc
+  deleteDoc,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 import {
@@ -32,7 +33,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 /* --------------------------------------------------
-   ADMIN ACCESS CHECK
+   ADMIN CHECK
 -------------------------------------------------- */
 async function checkAdmin(uid) {
   const ref = doc(db, "admin", uid);
@@ -53,12 +54,12 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  // Admin verified → show panel
-  document.getElementById("panelSites").style.display = "block";
-
-  loadUsers();
+  // Load all admin data
   loadSites();
   loadVideos();
+  loadRoblox();
+  loadUsers();
+  loadReports();
 });
 
 /* --------------------------------------------------
@@ -86,43 +87,16 @@ Object.keys(tabs).forEach(tabId => {
 });
 
 /* --------------------------------------------------
-   USERS
--------------------------------------------------- */
-async function loadUsers() {
-  const list = document.getElementById("panelUsers");
-  if (!list) return;
-
-  const container = document.createElement("ul");
-  container.id = "usersList";
-  container.innerHTML = "";
-
-  const snap = await getDocs(collection(db, "users"));
-  snap.forEach((docSnap) => {
-    const data = docSnap.data();
-    const li = document.createElement("li");
-    li.textContent = `${docSnap.id} — Credits: ${data.credits || 0}`;
-    container.appendChild(li);
-  });
-
-  list.appendChild(container);
-}
-
-/* --------------------------------------------------
-   SITES
+   LOAD SITES
 -------------------------------------------------- */
 async function loadSites() {
-  const panel = document.getElementById("panelSites");
-  if (!panel) return;
+  const list = document.getElementById("sitesList");
+  if (!list) return;
 
-  // Clear old list
-  const oldList = document.getElementById("sitesList");
-  if (oldList) oldList.remove();
-
-  const list = document.createElement("ul");
-  list.id = "sitesList";
+  list.innerHTML = "";
 
   const snap = await getDocs(collection(db, "sites"));
-  snap.forEach((docSnap) => {
+  snap.forEach(docSnap => {
     const data = docSnap.data();
     const li = document.createElement("li");
 
@@ -135,8 +109,6 @@ async function loadSites() {
     list.appendChild(li);
   });
 
-  panel.appendChild(list);
-
   document.querySelectorAll(".deleteSite").forEach(btn => {
     btn.addEventListener("click", async () => {
       await deleteDoc(doc(db, "sites", btn.dataset.id));
@@ -146,20 +118,37 @@ async function loadSites() {
 }
 
 /* --------------------------------------------------
-   VIDEOS
+   ADD SITE
+-------------------------------------------------- */
+const addSiteForm = document.getElementById("addSiteForm");
+if (addSiteForm) {
+  addSiteForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const url = document.getElementById("newSiteUrl").value.trim();
+    const ownerUid = document.getElementById("newSiteOwner").value.trim();
+
+    if (!url || !ownerUid) return;
+
+    const id = crypto.randomUUID();
+    await setDoc(doc(db, "sites", id), { url, ownerUid });
+
+    addSiteForm.reset();
+    loadSites();
+  });
+}
+
+/* --------------------------------------------------
+   LOAD VIDEOS
 -------------------------------------------------- */
 async function loadVideos() {
-  const panel = document.getElementById("panelVideos");
-  if (!panel) return;
+  const list = document.getElementById("videosList");
+  if (!list) return;
 
-  const oldList = document.getElementById("videosList");
-  if (oldList) oldList.remove();
-
-  const list = document.createElement("ul");
-  list.id = "videosList";
+  list.innerHTML = "";
 
   const snap = await getDocs(collection(db, "videos"));
-  snap.forEach((docSnap) => {
+  snap.forEach(docSnap => {
     const data = docSnap.data();
     const li = document.createElement("li");
 
@@ -172,12 +161,150 @@ async function loadVideos() {
     list.appendChild(li);
   });
 
-  panel.appendChild(list);
-
   document.querySelectorAll(".deleteVideo").forEach(btn => {
     btn.addEventListener("click", async () => {
       await deleteDoc(doc(db, "videos", btn.dataset.id));
       loadVideos();
+    });
+  });
+}
+
+/* --------------------------------------------------
+   ADD VIDEO
+-------------------------------------------------- */
+const addVideoForm = document.getElementById("addVideoForm");
+if (addVideoForm) {
+  addVideoForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const url = document.getElementById("newVideoUrl").value.trim();
+    const ownerUid = document.getElementById("newVideoOwner").value.trim();
+
+    if (!url || !ownerUid) return;
+
+    const id = crypto.randomUUID();
+    await setDoc(doc(db, "videos", id), { url, ownerUid });
+
+    addVideoForm.reset();
+    loadVideos();
+  });
+}
+
+/* --------------------------------------------------
+   LOAD ROBLOX
+-------------------------------------------------- */
+async function loadRoblox() {
+  const list = document.getElementById("robloxList");
+  if (!list) return;
+
+  list.innerHTML = "";
+
+  const snap = await getDocs(collection(db, "games"));
+  snap.forEach(docSnap => {
+    const data = docSnap.data();
+    const li = document.createElement("li");
+
+    li.innerHTML = `
+      <strong>${data.url}</strong><br>
+      Owner: ${data.ownerUid || "Unknown"}<br>
+      <button data-id="${docSnap.id}" class="deleteRoblox">Delete</button>
+    `;
+
+    list.appendChild(li);
+  });
+
+  document.querySelectorAll(".deleteRoblox").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      await deleteDoc(doc(db, "games", btn.dataset.id));
+      loadRoblox();
+    });
+  });
+}
+
+/* --------------------------------------------------
+   ADD ROBLOX GAME
+-------------------------------------------------- */
+const addRobloxForm = document.getElementById("addRobloxForm");
+if (addRobloxForm) {
+  addRobloxForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const url = document.getElementById("newRobloxUrl").value.trim();
+    const ownerUid = document.getElementById("newRobloxOwner").value.trim();
+
+    if (!url || !ownerUid) return;
+
+    const id = crypto.randomUUID();
+    await setDoc(doc(db, "games", id), { url, ownerUid });
+
+    addRobloxForm.reset();
+    loadRoblox();
+  });
+}
+
+/* --------------------------------------------------
+   LOAD USERS + GIVE CREDITS
+-------------------------------------------------- */
+async function loadUsers() {
+  const list = document.getElementById("usersList");
+  if (!list) return;
+
+  list.innerHTML = "";
+
+  const snap = await getDocs(collection(db, "users"));
+  snap.forEach(docSnap => {
+    const data = docSnap.data();
+    const li = document.createElement("li");
+    li.textContent = `${docSnap.id} — Credits: ${data.credits || 0}`;
+    list.appendChild(li);
+  });
+}
+
+const giveCreditsForm = document.getElementById("giveCreditsForm");
+if (giveCreditsForm) {
+  giveCreditsForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const uid = document.getElementById("creditUserUid").value.trim();
+    const amount = parseInt(document.getElementById("creditAmount").value.trim());
+
+    if (!uid || isNaN(amount)) return;
+
+    const userRef = doc(db, "users", uid);
+    await updateDoc(userRef, { credits: amount });
+
+    giveCreditsForm.reset();
+    loadUsers();
+  });
+}
+
+/* --------------------------------------------------
+   LOAD REPORTS + DELETE
+-------------------------------------------------- */
+async function loadReports() {
+  const list = document.getElementById("reportsList");
+  if (!list) return;
+
+  list.innerHTML = "";
+
+  const snap = await getDocs(collection(db, "reports"));
+  snap.forEach(docSnap => {
+    const data = docSnap.data();
+    const li = document.createElement("li");
+
+    li.innerHTML = `
+      <strong>${data.url}</strong><br>
+      Reason: ${data.reason}<br>
+      <button data-id="${docSnap.id}" class="deleteReport">Delete Report</button>
+    `;
+
+    list.appendChild(li);
+  });
+
+  document.querySelectorAll(".deleteReport").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      await deleteDoc(doc(db, "reports", btn.dataset.id));
+      loadReports();
     });
   });
 }
