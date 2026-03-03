@@ -9,13 +9,13 @@ import {
   doc,
   getDoc,
   setDoc,
-  deleteDoc,
-  updateDoc
+  deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 import {
   getAuth,
-  onAuthStateChanged
+  onAuthStateChanged,
+  signOut
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -53,41 +53,73 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  document.getElementById("adminPanel").style.display = "block";
-  loadAllData();
-});
+  // Admin verified → show panel
+  document.getElementById("panelSites").style.display = "block";
 
-/* --------------------------------------------------
-   LOAD ALL DATA
--------------------------------------------------- */
-async function loadAllData() {
   loadUsers();
   loadSites();
   loadVideos();
-}
+});
+
+/* --------------------------------------------------
+   TAB SWITCHING
+-------------------------------------------------- */
+const tabs = {
+  tabSites: "panelSites",
+  tabVideos: "panelVideos",
+  tabRoblox: "panelRoblox",
+  tabUsers: "panelUsers",
+  tabReports: "panelReports"
+};
+
+Object.keys(tabs).forEach(tabId => {
+  const btn = document.getElementById(tabId);
+  if (!btn) return;
+
+  btn.addEventListener("click", () => {
+    Object.values(tabs).forEach(panel => {
+      document.getElementById(panel).style.display = "none";
+    });
+
+    document.getElementById(tabs[tabId]).style.display = "block";
+  });
+});
 
 /* --------------------------------------------------
    USERS
 -------------------------------------------------- */
 async function loadUsers() {
-  const list = document.getElementById("usersList");
-  list.innerHTML = "";
+  const list = document.getElementById("panelUsers");
+  if (!list) return;
+
+  const container = document.createElement("ul");
+  container.id = "usersList";
+  container.innerHTML = "";
 
   const snap = await getDocs(collection(db, "users"));
   snap.forEach((docSnap) => {
     const data = docSnap.data();
     const li = document.createElement("li");
     li.textContent = `${docSnap.id} — Credits: ${data.credits || 0}`;
-    list.appendChild(li);
+    container.appendChild(li);
   });
+
+  list.appendChild(container);
 }
 
 /* --------------------------------------------------
    SITES
 -------------------------------------------------- */
 async function loadSites() {
-  const list = document.getElementById("sitesList");
-  list.innerHTML = "";
+  const panel = document.getElementById("panelSites");
+  if (!panel) return;
+
+  // Clear old list
+  const oldList = document.getElementById("sitesList");
+  if (oldList) oldList.remove();
+
+  const list = document.createElement("ul");
+  list.id = "sitesList";
 
   const snap = await getDocs(collection(db, "sites"));
   snap.forEach((docSnap) => {
@@ -96,12 +128,14 @@ async function loadSites() {
 
     li.innerHTML = `
       <strong>${data.url}</strong><br>
-      Owner: ${data.ownerUid}<br>
+      Owner: ${data.ownerUid || "Unknown"}<br>
       <button data-id="${docSnap.id}" class="deleteSite">Delete</button>
     `;
 
     list.appendChild(li);
   });
+
+  panel.appendChild(list);
 
   document.querySelectorAll(".deleteSite").forEach(btn => {
     btn.addEventListener("click", async () => {
@@ -115,8 +149,14 @@ async function loadSites() {
    VIDEOS
 -------------------------------------------------- */
 async function loadVideos() {
-  const list = document.getElementById("videosList");
-  list.innerHTML = "";
+  const panel = document.getElementById("panelVideos");
+  if (!panel) return;
+
+  const oldList = document.getElementById("videosList");
+  if (oldList) oldList.remove();
+
+  const list = document.createElement("ul");
+  list.id = "videosList";
 
   const snap = await getDocs(collection(db, "videos"));
   snap.forEach((docSnap) => {
@@ -125,12 +165,14 @@ async function loadVideos() {
 
     li.innerHTML = `
       <strong>${data.url}</strong><br>
-      Owner: ${data.ownerUid}<br>
+      Owner: ${data.ownerUid || "Unknown"}<br>
       <button data-id="${docSnap.id}" class="deleteVideo">Delete</button>
     `;
 
     list.appendChild(li);
   });
+
+  panel.appendChild(list);
 
   document.querySelectorAll(".deleteVideo").forEach(btn => {
     btn.addEventListener("click", async () => {
@@ -141,45 +183,9 @@ async function loadVideos() {
 }
 
 /* --------------------------------------------------
-   ADD SITE
+   LOGOUT
 -------------------------------------------------- */
-document.getElementById("addSiteForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const url = document.getElementById("newSiteUrl").value.trim();
-  const ownerUid = document.getElementById("newSiteOwner").value.trim();
-
-  if (!url || !ownerUid) return;
-
-  const id = crypto.randomUUID();
-  await setDoc(doc(db, "sites", id), {
-    url,
-    ownerUid
-  });
-
-  document.getElementById("newSiteUrl").value = "";
-  document.getElementById("newSiteOwner").value = "";
-  loadSites();
-});
-
-/* --------------------------------------------------
-   ADD VIDEO
--------------------------------------------------- */
-document.getElementById("addVideoForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const url = document.getElementById("newVideoUrl").value.trim();
-  const ownerUid = document.getElementById("newVideoOwner").value.trim();
-
-  if (!url || !ownerUid) return;
-
-  const id = crypto.randomUUID();
-  await setDoc(doc(db, "videos", id), {
-    url,
-    ownerUid
-  });
-
-  document.getElementById("newVideoUrl").value = "";
-  document.getElementById("newVideoOwner").value = "";
-  loadVideos();
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+  await signOut(auth);
+  window.location.href = "login.html";
 });
