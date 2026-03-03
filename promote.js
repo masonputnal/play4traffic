@@ -34,12 +34,12 @@ const tabs = document.querySelectorAll(".promote-tab");
 const urlInput = document.getElementById("urlInput");
 const urlLabel = document.getElementById("urlLabel");
 const costNote = document.getElementById("costNote");
+const typeWarning = document.getElementById("typeWarning");
 const form = document.getElementById("promoteForm");
 const formMessage = document.getElementById("formMessage");
 const userCreditsEl = document.getElementById("userCredits");
 const activeList = document.getElementById("activeList");
 const depletedList = document.getElementById("depletedList");
-const typeWarning = document.getElementById("typeWarning");
 
 let currentType = "site";
 let currentUser = null;
@@ -51,15 +51,12 @@ const activationCosts = {
   roblox: 1000
 };
 
-const perViewCosts = {
-  site: 1,
-  youtube: 2,
-  roblox: 3
+const durations = {
+  site: 10,
+  youtube: 15,
+  roblox: 20
 };
 
-/* --------------------------------------------------
-   URL VALIDATION (UI ONLY)
--------------------------------------------------- */
 function validateUrlForType(url, type) {
   if (type === "site") {
     return (
@@ -69,24 +66,15 @@ function validateUrlForType(url, type) {
       !url.includes("roblox.com/games")
     );
   }
-
   if (type === "youtube") {
-    return (
-      url.includes("youtube.com") ||
-      url.includes("youtu.be")
-    );
+    return url.includes("youtube.com") || url.includes("youtu.be");
   }
-
   if (type === "roblox") {
     return url.includes("roblox.com/games");
   }
-
   return false;
 }
 
-/* --------------------------------------------------
-   AUTH
--------------------------------------------------- */
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     window.location.href = "login.html";
@@ -101,9 +89,6 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
   signOut(auth);
 });
 
-/* --------------------------------------------------
-   TAB SWITCHING
--------------------------------------------------- */
 tabs.forEach(tab => {
   tab.addEventListener("click", () => {
     tabs.forEach(t => t.classList.remove("active"));
@@ -131,13 +116,9 @@ function updateFormForType() {
   const cost = activationCosts[currentType];
   costNote.textContent =
     `Activation cost: ${cost} credits. This also becomes your starting credits for this link.`;
-
   formMessage.textContent = "";
 }
 
-/* --------------------------------------------------
-   LOAD USER CREDITS
--------------------------------------------------- */
 async function loadUserCredits() {
   const ref = doc(db, "users", currentUser.uid);
   const snap = await getDoc(ref);
@@ -146,15 +127,11 @@ async function loadUserCredits() {
   userCreditsEl.textContent = `Credits: ${currentCredits}`;
 }
 
-/* --------------------------------------------------
-   SUBMIT PROMOTION (UI VALIDATION ADDED)
--------------------------------------------------- */
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   formMessage.textContent = "";
 
   const url = urlInput.value.trim();
-
   if (!validateUrlForType(url, currentType)) {
     formMessage.textContent = `This URL does not match the selected type (${currentType}).`;
     return;
@@ -166,24 +143,29 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
+  const collectionName =
+    currentType === "site" ? "sites" :
+    currentType === "youtube" ? "videos" :
+    "games";
+
   try {
-    // Deduct credits
-    const userRef = doc(db, "users", currentUser.uid);
-    await updateDoc(userRef, {
-      credits: (currentCredits - cost)
+    await addDoc(collection(db, collectionName), {
+      url,
+      ownerUid: currentUser.uid,
+      type: currentType,
+      duration: durations[currentType],
+      creditsAssigned: cost,
+      creditsRemaining: cost,
+      active: true,
+      addedAt: serverTimestamp()
     });
+
+    await updateDoc(doc(db, "users", currentUser.uid), {
+      credits: currentCredits - cost
+    });
+
     currentCredits -= cost;
     userCreditsEl.textContent = `Credits: ${currentCredits}`;
-
-    // Add promotion
-    await addDoc(collection(db, "promotedLinks"), {
-      owner: currentUser.uid,
-      type: currentType,
-      url,
-      credits: cost,
-      active: true,
-      createdAt: serverTimestamp()
-    });
 
     urlInput.value = "";
     formMessage.textContent = "Promotion created successfully.";
@@ -194,39 +176,28 @@ form.addEventListener("submit", async (e) => {
   }
 });
 
-/* --------------------------------------------------
-   LOAD PROMOTIONS
--------------------------------------------------- */
 async function loadPromotions() {
   activeList.innerHTML = "";
   depletedList.innerHTML = "";
 
-  const q = query(
-    collection(db, "promotedLinks"),
-    where("owner", "==", currentUser.uid)
-  );
-  const snap = await getDocs(q);
+  const collectionsToCheck = ["sites", "videos", "games"];
+  const all = [];
 
-  const active = [];
-  const depleted = [];
+  for (const col of collectionsToCheck) {
+    const q = query(collection(db, col), where("ownerUid", "==", currentUser.uid));
+    const snap = await getDocs(q);
+    snap.forEach(docSnap => {
+      all.push({ id: docSnap.id, ...docSnap.data(), col });
+    });
+  }
 
-  snap.forEach(docSnap => {
-    const d = docSnap.data();
-    const item = { id: docSnap.id, ...d };
-    if (item.active && item.credits > 0) {
-      active.push(item);
-    } else {
-      depleted.push(item);
-    }
-  });
+  const active = all.filter(i => i.active && i.creditsRemaining > 0);
+  const depleted = all.filter(i => !i.active || i.creditsRemaining <= 0);
 
   active.forEach(item => renderPromoRow(item, activeList));
   depleted.forEach(item => renderPromoRow(item, depletedList));
 }
 
-/* --------------------------------------------------
-   RENDER PROMO ROW
--------------------------------------------------- */
 function renderPromoRow(item, container) {
   const row = document.createElement("div");
   row.className = "promo-row";
@@ -245,14 +216,14 @@ function renderPromoRow(item, container) {
 
   const meta = document.createElement("div");
   meta.className = "promo-meta";
-  meta.textContent = `Credits: ${item.credits}`;
+  meta.textContent = `Credits: ${item.creditsRemaining}`;
 
   const status = document.createElement("span");
   status.className = "promo-status";
-  if (item.active && item.credits > 0) {
+  if (item.active && item.creditsRemaining > 0) {
     status.classList.add("active");
     status.textContent = "Active";
-  } else if (!item.active && item.credits > 0) {
+  } else if (!item.active && item.creditsRemaining > 0) {
     status.classList.add("paused");
     status.textContent = "Paused";
   } else {
@@ -270,21 +241,26 @@ function renderPromoRow(item, container) {
   const actions = document.createElement("div");
   actions.className = "promo-actions";
 
-  if (item.active && item.credits > 0) {
+  if (item.active && item.creditsRemaining > 0) {
     const pauseBtn = document.createElement("button");
     pauseBtn.textContent = "Pause";
-    pauseBtn.addEventListener("click", () => updateActive(item.id, false));
+    pauseBtn.addEventListener("click", () => updateActive(item.col, item.id, false));
     actions.appendChild(pauseBtn);
-  } else if (!item.active && item.credits > 0) {
+  } else if (!item.active && item.creditsRemaining > 0) {
     const resumeBtn = document.createElement("button");
     resumeBtn.textContent = "Resume";
-    resumeBtn.addEventListener("click", () => updateActive(item.id, true));
+    resumeBtn.addEventListener("click", () => updateActive(item.col, item.id, true));
     actions.appendChild(resumeBtn);
   }
 
+  const addBtn = document.createElement("button");
+  addBtn.textContent = "Add Credits";
+  addBtn.addEventListener("click", () => addCreditsPrompt(item));
+  actions.appendChild(addBtn);
+
   const deleteBtn = document.createElement("button");
   deleteBtn.textContent = "Delete";
-  deleteBtn.addEventListener("click", () => deletePromo(item.id));
+  deleteBtn.addEventListener("click", () => deletePromo(item));
   actions.appendChild(deleteBtn);
 
   row.appendChild(main);
@@ -292,26 +268,69 @@ function renderPromoRow(item, container) {
   container.appendChild(row);
 }
 
-/* --------------------------------------------------
-   UPDATE ACTIVE
--------------------------------------------------- */
-async function updateActive(id, value) {
+async function updateActive(col, id, value) {
   try {
-    await updateDoc(doc(db, "promotedLinks", id), { active: value });
+    await updateDoc(doc(db, col, id), { active: value });
     await loadPromotions();
   } catch (err) {
     console.error(err);
   }
 }
 
-/* --------------------------------------------------
-   DELETE PROMO
--------------------------------------------------- */
-async function deletePromo(id) {
+async function deletePromo(item) {
   try {
-    await updateDoc(doc(db, "promotedLinks", id), { active: false, credits: 0 });
+    const refund = item.creditsRemaining || 0;
+
+    if (refund > 0) {
+      await updateDoc(doc(db, "users", currentUser.uid), {
+        credits: currentCredits + refund
+      });
+      currentCredits += refund;
+      userCreditsEl.textContent = `Credits: ${currentCredits}`;
+    }
+
+    await updateDoc(doc(db, item.col, item.id), {
+      active: false,
+      creditsRemaining: 0
+    });
+
     await loadPromotions();
   } catch (err) {
     console.error(err);
+    alert("Error deleting promotion.");
+  }
+}
+
+async function addCreditsPrompt(item) {
+  const amount = prompt("How many credits would you like to add?");
+  if (!amount) return;
+
+  const add = parseInt(amount);
+  if (isNaN(add) || add <= 0) {
+    alert("Invalid credit amount.");
+    return;
+  }
+
+  if (currentCredits < add) {
+    alert("You do not have enough credits.");
+    return;
+  }
+
+  try {
+    await updateDoc(doc(db, item.col, item.id), {
+      creditsRemaining: item.creditsRemaining + add
+    });
+
+    await updateDoc(doc(db, "users", currentUser.uid), {
+      credits: currentCredits - add
+    });
+
+    currentCredits -= add;
+    userCreditsEl.textContent = `Credits: ${currentCredits}`;
+
+    await loadPromotions();
+  } catch (err) {
+    console.error(err);
+    alert("Error adding credits.");
   }
 }
