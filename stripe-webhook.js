@@ -1,12 +1,19 @@
+require("firebase-admin");
+
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const admin = require("firebase-admin");
 
-// Initialize Firebase Admin once
+// Initialize Firebase Admin using service account JSON from Netlify
 if (!admin.apps.length) {
+  const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+
   admin.initializeApp({
-    credential: admin.credential.applicationDefault()
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: `https://${serviceAccount.project_id}.firebaseio.com`
   });
 }
+
+const db = admin.firestore();
 
 // Map Stripe Price IDs → Credits to add
 const CREDIT_MAP = {
@@ -39,7 +46,6 @@ exports.handler = async (event) => {
     const creditsToAdd = CREDIT_MAP[priceId];
 
     if (uid && creditsToAdd) {
-      const db = admin.firestore();
       const userRef = db.collection("users").doc(uid);
 
       await userRef.set(
@@ -53,4 +59,3 @@ exports.handler = async (event) => {
 
   return { statusCode: 200, body: "success" };
 };
-
