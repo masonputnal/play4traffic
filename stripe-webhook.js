@@ -37,6 +37,9 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: `Webhook Error: ${err.message}` };
   }
 
+  // 🔍 Debug: confirm environment variable is available at runtime
+  console.log("FIREBASE_SERVICE_ACCOUNT exists:", !!process.env.FIREBASE_SERVICE_ACCOUNT);
+
   if (stripeEvent.type === "checkout.session.completed") {
     const session = stripeEvent.data.object;
 
